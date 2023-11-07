@@ -17,7 +17,7 @@ class CPUSimulationStep(Step):
         if not hasattr(cls, 'instance'):
             cls.instance = super(
                 CPUSimulationStep,
-                cls
+                cls 
             ).__new__(cls)
 
         return cls.instance
