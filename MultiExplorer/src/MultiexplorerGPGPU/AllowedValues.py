@@ -53,6 +53,15 @@ class PredictedModels(Enum):
 
         raise ValueError("Value does not corresponds to a known predicted core.")
     
+    @staticmethod
+    def get_json_path(value):
+        if value == PredictedModels.gtx480.value:
+            return PATH_INPUTS + "/gtx480.json"
+        elif value == PredictedModels.titanx.value:
+            return PATH_INPUTS + "/titanx.json"
+
+        raise ValueError("Can't find default input json file for unknown/unpredicted cores.")
+    
     
 class Applications(Enum):
     asyncAPI = 1

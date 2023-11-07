@@ -41,8 +41,16 @@ class MultiexplorerGPGPUExecutionFlow(ExecutionFlow):
                 + "/" + MultiexplorerGPGPUExecutionFlow.get_label().replace(' ', '_')
         )
     
+
+    def setup_dirs(self):
+        output_path = self.get_output_path()
+
+        if not os.path.exists(output_path):
+            os.makedirs(output_path)
+
+
     def execute(self):
-        
+        self.setup_dirs()
         ExecutionFlow.execute(self)
 
     def handle_step_failure(self, step):

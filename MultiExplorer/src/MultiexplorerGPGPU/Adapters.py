@@ -10,13 +10,46 @@ from MultiExplorer.src.MultiexplorerGPGPU.AllowedValues import PredictedModels, 
 from MultiExplorer.src.Infrastructure.ExecutionFlow import Adapter
 from MultiExplorer.src.Infrastructure.Inputs import Input, InputGroup, InputType
 from MultiExplorer.src.config import PATH_PRED_VM
+from MultiExplorer.src.config import PATH_REPO
+
+"""importPath = os.path.dirname(os.path.realpath(
+    __file__)) + '/PerformanceExploration/Multi2Sim'
+sys.path.insert(0, importPath)
+importPath = os.path.dirname(os.path.realpath(
+    __file__)) + '/PerformanceExploration/Sniper'
+sys.path.insert(0, importPath)
+importPath = os.path.dirname(os.path.realpath(
+    __file__)) + '/PhysicalExploration/McPAT'
+sys.path.insert(0, importPath)
+importPath = os.path.dirname(os.path.realpath(
+    __file__)) + '/PerformanceExploration/MPSoCBench'
+sys.path.insert(0, importPath)
+importPath = os.path.dirname(os.path.realpath(
+    __file__)) + '/DS_DSE/nsga2/'
+sys.path.insert(0, importPath)
+importPath = os.path.dirname(os.path.realpath(
+    __file__)) + '/DS_DSE/'
+sys.path.insert(0, importPath)
+importPath = os.path.dirname(os.path.realpath(
+    __file__)) + '/DS_DSE/brute_force/'
+sys.path.insert(0, importPath)"""
+importPath = os.path.dirname(os.path.realpath(
+    __file__)) + '/PerformanceExploration/GPGPU'
+sys.path.insert(0, importPath)
+
+from GPGPU import GPGPU
+#from Multi2Sim import Multi2Sim
+#from Sniper import Sniper
+#from MPSoCBench import MPSoCBench
+#from McPAT import McPAT
+#from DS_DSE import Nsga2Main
+#from DS_DSE.brute_force import DsDseBruteForce
 
 
 class GPGPUSimulatorAdapter(Adapter):
+    
     def __init__(self):
         Adapter.__init__(self)
-
-        self.presenter = None
 
         self.set_inputs([
             InputGroup({
@@ -29,35 +62,47 @@ class GPGPUSimulatorAdapter(Adapter):
                         "is_user_input" : True,
                         "required" : True,
                         "allowed_values" : PredictedModels.get_dict(),
+                    }),
+                    Input({
+                        "label" : "Application",
+                        "key" : "app",
+                        "is_user_input" : True,
+                        "required" : False,
+                        "allowed_values" : Applications.get_dict()
                     })
                 ]
             }),
         ])
 
-        self.config = {}
+        self.inFile = None
 
-        self.results = {}
+        self.inJson = None
+        
+        self.simTool = None
 
-        self.presentable_results = None
-
-        self.use_benchmarks = True
-
-        self.benchmark_size = None
-
-        self.dse_settings_file_name = None
-
-        self.cfg_path = None
-
-        self.output_path = None
+        self.dirListB4 = os.listdir(PATH_REPO)
+        
+        #self.folderOldSimul = None
 
 
-    def set_values_from_json(self, absolute_file_path):
-        """
-        This method reads a json file and sets the values of the inputs.
-        """
-        input_json = json.loads(open(absolute_file_path).read())
+    def execute(self):
+        self.prepare()
+        self.simTool.parse()
+        self.simTool.execute()
+        self.simTool.convertResults()
 
 
+    def prepare(self):
+        
+        self.inFile = self.inFile = PredictedModels.get_json_path(self.inputs['Settings']['model_gpu'])
+
+        with open(self.inFile) as data_file:
+            self.inJson = json.load(data_file)
+            
+        self.simTool = GPGPU(self.inFile, self.inJson['Preferences']['application'])
+
+
+ 
 class DSEAdapter(Adapter):
 
     def __init__(self):
@@ -72,23 +117,16 @@ class DSEAdapter(Adapter):
                         'label': 'Ip Cores for design',
                         'key': 'ip_cores_for_design',
                         "is_user_input": True,
-                        "required": True,
+                        "required": False,
                         'type': InputType.IntegerRange,
                         'min_val': 1,
                         'max_val': 31,
                     }),
                     Input({
-                        "label" : "Application",
-                        "key" : "app",
-                        "is_user_input" : True,
-                        "required" : True,
-                        "allowed_values" : Applications.get_dict()
-                    }),
-                    Input({
                         'label': 'Original Cores for desing',
                         'key': 'original_cores_for_design',
                         "is_user_input": True,
-                        "required": True,
+                        "required": False,
                         "type": InputType.IntegerRange,
                         "min_val": 1,
                         "max_val": 32,
@@ -105,7 +143,7 @@ class DSEAdapter(Adapter):
                         'key': 'maximum_power_density',
                         'type': InputType.Float,
                         "is_user_input": True,
-                        "required": True,
+                        "required": False,
                     }),
                     Input({
                         'label': 'Maximum Area',
@@ -113,7 +151,7 @@ class DSEAdapter(Adapter):
                         'key': 'maximum_area',
                         'type': InputType.Float,
                         "is_user_input": True,
-                        "required": True,
+                        "required": False,
                     }),
                 ],
             }),
@@ -124,6 +162,12 @@ class DSEAdapter(Adapter):
     def execute(self):
         self.prepare()
 
-        self.dse_engine.run()
+        #self.dse_engine.run()
 
-        self.register_results()
+        #self.register_results()
+
+
+    def prepare(self):
+        pass
+
+
