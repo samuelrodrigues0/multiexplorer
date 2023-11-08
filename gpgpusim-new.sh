@@ -12,8 +12,8 @@ fi
 
 if [ -z $1 ] || [ -z $2 ] || [ -z $3 ] || [ -z $4 ]||[ -z $5 ];
 then
-    RUNDIR=$HOME/rundir/Multiexplorer_GPGPU
-    CONFIGS_FOLDER=$HOME/gpgpu-sim_distribution/configs/tested-cfgs/SM2_GTX480
+    RUNDIR=/multiexplorer/rundir/Multiexplorer_GPGPU
+    CONFIGS_FOLDER=/multiexplorer/gpgpu-sim_distribution/configs/tested-cfgs/SM2_GTX480
     BFSOUTUPUT=BFSOutput.txt
     BFSERROR=BFSstderr.txt
 else
@@ -49,7 +49,7 @@ for arg in "$@"
 do
     if [ $cnt -gt 5 ]; then
 	   if [ -z "$APPLICATION" ]; then
-        APPLICATION="$PWD/../../$arg"
+        APPLICATION="$PWD/../../../$arg"
 	   else
         APPLICATION="$APPLICATION $arg"
 	   fi
@@ -79,7 +79,7 @@ mv $BFSOUTUPUT output/
 mv $BFSERROR output/
 #cp $MULTIEXPLORER_INPUT output/
 cp *.log output/
-rm -rf $HOME/multiexplorer/$CONFIGS_FOLDER
+rm -rf /multiexplorer/$CONFIGS_FOLDER
 # Atribui o diretorio de ambiente (RUNDIR=$HOME/...)
 # Copia todas as configurações para o RUNDIR
 # Acessa o RUNDIR

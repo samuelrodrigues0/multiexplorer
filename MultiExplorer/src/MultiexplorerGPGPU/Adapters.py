@@ -57,14 +57,14 @@ class GPGPUSimulatorAdapter(Adapter):
                 'key': 'Settings',
                 "inputs": [
                     Input({
-                        "label" : "GPU Model",
-                        "key" : "model_gpu",
+                        "label" : "Model",
+                        "key" : "model",
                         "is_user_input" : True,
                         "required" : True,
                         "allowed_values" : PredictedModels.get_dict(),
                     }),
                     Input({
-                        "label" : "Application",
+                        "label" : "Application (GPU-ONLY)",
                         "key" : "app",
                         "is_user_input" : True,
                         "required" : False,
@@ -94,12 +94,30 @@ class GPGPUSimulatorAdapter(Adapter):
 
     def prepare(self):
         
-        self.inFile = self.inFile = PredictedModels.get_json_path(self.inputs['Settings']['model_gpu'])
+        self.inFile = self.inFile = PredictedModels.get_json_path(self.inputs['Settings']['model'])
 
         with open(self.inFile) as data_file:
             self.inJson = json.load(data_file)
             
-        self.simTool = GPGPU(self.inFile, self.inJson['Preferences']['application'])
+        def multi2sim():
+            path = importPath + '/PerformanceExploration/Multi2Sim/'
+            self.simTool = Multi2Sim(
+                self.inFile, "paramMap.json", "PerformanceMap_new.json")
+            pass
+
+        def sniper():
+            #print self.inJson['Preferences']['application']
+            self.simTool = Sniper(self.inFile, self.inJson['Preferences']['application'])
+            pass
+        def gpgpusim():
+            self.simTool = GPGPU(self.inFile, app=Applications.get_model(self.inputs['Settings']['app']))
+            pass
+        def mpsocbench():
+            self.simTool = MPSoCBench(
+                self.inFile, "paramMap.json", "PerformanceMap_new.json")
+            pass
+
+        eval(PredictedModels.get_sim_tool(self.inputs['Settings']['model']) + '()')
 
 
  

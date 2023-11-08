@@ -36,7 +36,8 @@ class GPGPU(SimulationTool.SimulationTool):
             self.paramMap = json.load(data_file)
         self.appConfig = os.path.join(dir_path+"/"+ "appconfig.json")
         self.config = json.load(open(self.jsonFile))
-        self.app = self.config['Preferences']['application']
+        #self.app = self.config['Preferences']['application']
+        self.app = app
         self.geral = self.config['General_Modeling']
         self.outFile= self.createInputFolder(self.geral)
        
@@ -118,7 +119,7 @@ class GPGPU(SimulationTool.SimulationTool):
         except:
             Arg =  app
             #print(InputParams["app"])
-        #print(Arg)
+        
         return Arg
     def configParser(self):
         dstFolder =os.path.join(SIM_OUT+"/"+ self.outFile+"/gpgpusim.config")
@@ -179,7 +180,6 @@ class GPGPU(SimulationTool.SimulationTool):
         appArg= self.appArgs(self.app,self.appConfig )
         #print("./gpgpusim-new.sh Rundir " + self.outFile+" BFSOutput.txt BFSstderr.txt "+BENCHPATH+appArg)
         os.system("./gpgpusim-new.sh "+self.config['Preferences']['project_name']+" " + self.outFile+" BFSOutput.txt BFSstderr.txt "+self.jsonFile+" "+BENCHPATH+appArg)
-
 
     def convertResults(self):
         print("Converte results")
