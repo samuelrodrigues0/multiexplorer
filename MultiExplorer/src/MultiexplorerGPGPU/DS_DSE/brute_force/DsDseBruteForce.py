@@ -12,7 +12,7 @@ class DsDseBruteForce(object):
     """Main Class"""
 
     def __init__(self, projectFolder, pathCSV=sys.argv[1], path_db=DbSelector(inputName=sys.argv[1]).select_db()):
-        
+        self.path_db = DbSelector(inputName=pathCSV).select_db()
         self.inputDict= InOut(projectFolder).makeInputDict()
         self.preditor= InOut(projectFolder).performancePreditor()
         #print(self.inputDict)

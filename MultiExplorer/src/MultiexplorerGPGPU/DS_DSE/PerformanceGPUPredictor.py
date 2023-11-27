@@ -4,7 +4,7 @@ import os
 import numpy as np
 from sklearn import metrics
 import pandas as pd
-from metric import *
+import MultiExplorer.src.metric
 
 class PerformanceGPUPredictor(object):
     """Main Class"""
@@ -29,8 +29,9 @@ class PerformanceGPUPredictor(object):
         #print(self.amountCore)
         #instaciou todas as variaveis com valores validos
         # neg_mean_absolute_percentage_scorer = metrics.make_scorer(mean_absolute_percentage_error, greater_is_better=False)
+        print("testeeeeeeeeeeeeeeeee", dir_path)
         self.preditor = joblib.load(dir_path+"/predictors/"+'MLP.joblib')#carregou o preditor
-        #print("oi")
+        print("oi")
         self.scaler = joblib.load(dir_path+"/predictors/"+'pipe.joblib')#carregou o escalador do conjunto de entrada
         #print "Pred + Escala: " + str(self.processor) + "\n"
     def logData(self,data):
