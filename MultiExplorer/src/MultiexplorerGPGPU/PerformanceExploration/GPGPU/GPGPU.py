@@ -18,7 +18,7 @@ dir_path = os.path.dirname(os.path.realpath(__file__))
 
 
 CONFIGPATH=os.path.join(GPU_PATH+'/configs/tested-cfgs/')
-print(CONFIGPATH)
+#print(CONFIGPATH)
 # Set path to the output
 SIM_OUT = os.getcwd()
 
@@ -31,6 +31,7 @@ class GPGPU(SimulationTool.SimulationTool):
     def __init__(self, jsonFile="input.json", app="clock",paramMap= "paramMap.json", directory_out=SIM_OUT, outJson=None):
         super(GPGPU, self).__init__(jsonFile, paramMap, outJson)
         self.jsonFile = jsonFile
+        #print('JSON_FILE = ', self.jsonFile)
         self.outJson = outJson
         with open(dir_path + '/' + paramMap) as data_file:
             self.paramMap = json.load(data_file)
@@ -40,16 +41,22 @@ class GPGPU(SimulationTool.SimulationTool):
         self.app = app
         self.geral = self.config['General_Modeling']
         self.outFile= self.createInputFolder(self.geral)
+        self.foldername = self.geral['model_name'] + '_' + self.app
+        print("FOLDERNAMEEEEEEEEEEEEEEEEEEEE>>>>> ", self.foldername)
+
        
         try: 
             gpuConfigFolders= [f for f in os.listdir(CONFIGPATH)]
             self.gpuInputFolder = [x for x in gpuConfigFolders if x.endswith(self.geral["model_name"])][0]
         except:
-             raise Exception("Model name not found")
+            raise Exception("Model name not found ()")
+
         # self.outputJson = None
         # read json file as object, and extracts the number of cores
         
         #config = eval(config)
+
+
     def lineCheck(self,line):
         if line.startswith("-gpuwattch_xml_file"):
             return ""
@@ -72,6 +79,7 @@ class GPGPU(SimulationTool.SimulationTool):
                 line = aux[0]+ " "+ str(inputValue)+"\n"
         return line 
 
+
     def inputFolderName(self,params, path):
         if path == "": 
             DirName=path
@@ -83,13 +91,17 @@ class GPGPU(SimulationTool.SimulationTool):
             DirName = DirName+str(params[i])+"_"
         return DirName
     
+    
     def createInputFolder(self,params):
         Inputpath ="Inputs"
         DirName= self.inputFolderName(params, "")
         #print(DirName)
         if not os.path.exists(DirName):
             os.makedirs(DirName)
+
+        print("DIRNMAE: ", DirName)
         return DirName 
+
 
     def copyFiles(self, SrcDir, DestDir):
         SrcDir=CONFIGPATH + SrcDir
@@ -100,10 +112,13 @@ class GPGPU(SimulationTool.SimulationTool):
                 continue
             else :
                 shutil.copy2(os.path.join(SrcDir,fname), DestDir)
+
+
     def jsonToDict(self,JsonFile):
         with open(JsonFile) as json_file:
             data = json.load(json_file)
         return data
+
 
     def appArgs(self,app, jsonFile):
         Arg =""    
@@ -121,9 +136,11 @@ class GPGPU(SimulationTool.SimulationTool):
             #print(InputParams["app"])
         
         return Arg
+
+
     def configParser(self):
         dstFolder =os.path.join(SIM_OUT+"/"+ self.outFile+"/gpgpusim.config")
-        print(dstFolder)           
+        #print(dstFolder)           
         WF=open(dstFolder, 'w')
         RF=os.path.join(CONFIGPATH+self.gpuInputFolder+"/gpgpusim.config")
         
@@ -137,6 +154,7 @@ class GPGPU(SimulationTool.SimulationTool):
                     WF.write(line)
         
         self.copyFiles(self.gpuInputFolder, self.outFile)
+
 
     def xmlParser(self):
         if self.geral["gpuwattch"]:
@@ -170,16 +188,18 @@ class GPGPU(SimulationTool.SimulationTool):
         #print(RF)
 
 
-
     def parse(self):
         self.configParser()
         self.xmlParser()
-    #def parse():
+        print("OUTFILE: ", self.outFile)
+
         
     def execute(self):
         appArg= self.appArgs(self.app,self.appConfig )
         #print("./gpgpusim-new.sh Rundir " + self.outFile+" BFSOutput.txt BFSstderr.txt "+BENCHPATH+appArg)
-        os.system("./gpgpusim-new.sh "+self.config['Preferences']['project_name']+" " + self.outFile+" BFSOutput.txt BFSstderr.txt "+self.jsonFile+" "+BENCHPATH+appArg)
+        #os.system("./gpgpusim-new.sh "+self.config['Preferences']['project_name']+" " + self.outFile+" BFSOutput.txt BFSstderr.txt "+self.jsonFile+" "+BENCHPATH+appArg)
+        os.system("./gpgpusim-new.sh "+ self.foldername + " " + self.outFile+" BFSOutput.txt BFSstderr.txt "+self.jsonFile+" "+BENCHPATH+appArg)
+
 
     def convertResults(self):
         print("Converte results")

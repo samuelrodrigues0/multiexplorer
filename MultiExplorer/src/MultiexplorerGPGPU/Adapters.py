@@ -6,7 +6,7 @@ import re
 from typing import Dict, Union, Any, Optional
 from xml.dom import minidom
 from xml.etree import ElementTree
-from MultiExplorer.src.MultiexplorerGPGPU.AllowedValues import PredictedModels, Applications
+from MultiExplorer.src.MultiexplorerGPGPU.AllowedValues import PredictedModels, Applications, Configs
 from MultiExplorer.src.Infrastructure.ExecutionFlow import Adapter
 from MultiExplorer.src.Infrastructure.Inputs import Input, InputGroup, InputType
 from MultiExplorer.src.config import PATH_PRED_VM
@@ -14,18 +14,7 @@ from MultiExplorer.src.config import PATH_REPO, PATH_RUNDIR
 from MultiExplorer.src.metric import *
 from sklearn import metrics
 
-"""importPath = os.path.dirname(os.path.realpath(
-    __file__)) + '/PerformanceExploration/Multi2Sim'
-sys.path.insert(0, importPath)
-importPath = os.path.dirname(os.path.realpath(
-    __file__)) + '/PerformanceExploration/Sniper'
-sys.path.insert(0, importPath)
-importPath = os.path.dirname(os.path.realpath(
-    __file__)) + '/PhysicalExploration/McPAT'
-sys.path.insert(0, importPath)
-importPath = os.path.dirname(os.path.realpath(
-    __file__)) + '/PerformanceExploration/MPSoCBench'
-sys.path.insert(0, importPath)"""
+
 importPath = os.path.dirname(os.path.realpath(
     __file__)) + '/DS_DSE/nsga2/'
 sys.path.insert(0, importPath)
@@ -40,11 +29,7 @@ importPath = os.path.dirname(os.path.realpath(
 sys.path.insert(0, importPath)
 
 from GPGPU import GPGPU
-#from Multi2Sim import Multi2Sim
-#from Sniper import Sniper
-#from MPSoCBench import MPSoCBench
-#from McPAT import McPAT
-from DS_DSE import Nsga2Main
+from DS_DSE.Nsga2Main import Nsga2Main
 from DsDseBruteForce import DsDseBruteForce
 
 
@@ -66,7 +51,7 @@ class GPGPUSimulatorAdapter(Adapter):
                         "allowed_values" : PredictedModels.get_dict(),
                     }),
                     Input({
-                        "label" : "Application (GPU-ONLY)",
+                        "label" : "Application",
                         "key" : "app",
                         "is_user_input" : True,
                         "required" : False,
@@ -89,8 +74,8 @@ class GPGPUSimulatorAdapter(Adapter):
 
     def execute(self):
         self.prepare()
-        
         self.sim_execute()
+        self.project_folder()
 
 
     def prepare(self):
@@ -99,32 +84,12 @@ class GPGPUSimulatorAdapter(Adapter):
 
         self.inFile = PredictedModels.get_json_path(self.inputs['Settings']['model'])
         jsonLocation = self.inFile
-        print(self.inFile, jsonLocation)
 
         with open(self.inFile) as data_file:
             self.inJson = json.load(data_file)
             
-        def multi2sim():
-            path = importPath + '/PerformanceExploration/Multi2Sim/'
-            self.simTool = Multi2Sim(
-                self.inFile, "paramMap.json", "PerformanceMap_new.json")
-            pass
+        self.simTool = GPGPU(self.inFile, app=Applications.get_model(self.inputs['Settings']['app']))
 
-        def sniper():
-            #print self.inJson['Preferences']['application']
-            self.simTool = Sniper(self.inFile, self.inJson['Preferences']['application'])
-            pass
-        def gpgpusim():
-            self.simTool = GPGPU(self.inFile, app=Applications.get_model(self.inputs['Settings']['app']))
-            pass
-        def mpsocbench():
-            self.simTool = MPSoCBench(
-                self.inFile, "paramMap.json", "PerformanceMap_new.json")
-            pass
-
-        eval(PredictedModels.get_sim_tool(self.inputs['Settings']['model']) + '()')
-
-        self.project_folder()
 
 
     def sim_execute(self):
@@ -136,11 +101,17 @@ class GPGPUSimulatorAdapter(Adapter):
     def project_folder(self):
 
         global projectFolder
-        if PredictedModels.get_sim_tool(self.inputs['Settings']['model']) =="gpgpusim":
+
+        path = PATH_RUNDIR + '/Multiexplorer_GPGPU/'
+        dirs = [f for f in os.listdir(PATH_RUNDIR + '/Multiexplorer_GPGPU/') if os.path.isdir(os.path.join(path, f))]
+        sorted_dirs = sorted(dirs, key=lambda d: os.path.getctime(os.path.join(path, d)), reverse=True)
+        projectFolder = path + sorted_dirs[0]
+
+        """if PredictedModels.get_sim_tool(self.inputs['Settings']['model']) == "gpgpusim":
                 for f in os.listdir(PATH_RUNDIR + '/Multiexplorer_GPGPU/'):
                     if f.startswith(self.inJson['Preferences']['project_name']):
                         projectFolder=os.path.join("rundir/Multiexplorer_GPGPU/", f)
-                        break  
+                        break  """
 
 
 class DSEAdapter(Adapter):
@@ -150,12 +121,33 @@ class DSEAdapter(Adapter):
 
         self.set_inputs([
             InputGroup({
+                'label': "DSE Settings",
+                'key': 'dse_Settings',
+                "inputs": [
+                    Input({
+                        'label': 'Run brute force aswell',
+                        'key': 'run_brute_force',
+                        "is_user_input": True,
+                        "required": False,
+                        'type': InputType.Checkbutton,
+                        'value': True,
+                    }),
+                    Input({
+                        "label" : "DSE Config",
+                        "key" : "dse_config",
+                        "is_user_input" : True,
+                        "required" : False,
+                        "allowed_values" : Configs.get_dict()
+                    })
+                ]
+            }),
+            InputGroup({
                 'label': "Exploration Space",
                 'key': 'exploration_space',
                 'inputs': [
                     Input({
-                        'label': 'Ip Cores for design',
-                        'key': 'ip_cores_for_design',
+                        'label': 'GPU Cores for design',
+                        'key': 'gpu_cores_for_design',
                         "is_user_input": True,
                         "required": False,
                         'type': InputType.IntegerRange,
@@ -163,7 +155,7 @@ class DSEAdapter(Adapter):
                         'max_val': 31,
                     }),
                     Input({
-                        'label': 'Original Cores for desing',
+                        'label': 'Original Cores for design',
                         'key': 'original_cores_for_design',
                         "is_user_input": True,
                         "required": False,
@@ -197,6 +189,46 @@ class DSEAdapter(Adapter):
                     }),
                 ],
             }),
+            InputGroup({
+                'label': "NSGA-II Parameters",
+                'key': 'nsga_parameters',
+                'inputs': [
+                    Input({
+                        'label': 'Crossing Rate',
+                        'unit': '%',
+                        'key': 'mutation_strength',
+                        'type': InputType.Float,
+                        "is_user_input": True,
+                        "required": True,
+                        "default_value": 50.0,
+                    }),
+                    Input({
+                        'label': 'Mutation Rate',
+                        'unit': '%',
+                        'key': 'mutation_rate',
+                        'type': InputType.Float,
+                        "is_user_input": True,
+                        "required": True,
+                        "default_value": 10.0,
+                    }),
+                    Input({
+                        'label': 'Population Size',
+                        'key': 'num_of_individuals',
+                        'type': InputType.Integer,
+                        "is_user_input": True,
+                        "required": True,
+                        "default_value": 10
+                    }),
+                    Input({
+                        'label': 'Number of Generations',
+                        'key': 'num_of_generations',
+                        'type': InputType.Integer,
+                        "is_user_input": True,
+                        "required": True,
+                        "default_value": 150
+                    }),
+                ],
+            })
         ])
 
         self.dse_engine = None
@@ -205,13 +237,12 @@ class DSEAdapter(Adapter):
         self.inJson = None
 
 
-
     def execute(self):
         self.prepare()
 
-        self.dseBruteForce()
+        #self.dseBruteForce()
 
-        #self.dse()
+        self.dse()
 
 
     def prepare(self):
@@ -222,12 +253,12 @@ class DSEAdapter(Adapter):
             self.inJson = json.load(data_file)
 
 
-
     def dse(self):
 
         if self.inJson['Preferences']['DSE']:
             start = time.time()
-            Nsga2Main(projectFolder, pathCSV=self.inFile)
+            print('RAPAZ... ', self.inFile)
+            Nsga2Main(projectFolder)
             print("DSE NSGA2: OK") 
             end = time.time()
             print("The time of execution of NSGA program is :", end-start)
@@ -238,6 +269,11 @@ class DSEAdapter(Adapter):
         neg_mean_absolute_percentage_scorer = metrics.make_scorer(mean_absolute_percentage_error, greater_is_better=False)
         if self.inJson['Preferences']['DSE']:
             start = time.time()
+            print('\n\n')
+            print("DseBruteFORCE:")
+            print('\n\n')
+            print("JSON FILE: ", self.inFile)
+            print("PROJECT FOLDER: ", projectFolder)
             DsDseBruteForce(projectFolder, pathCSV=self.inFile)
             end = time.time()
             print("DSE Brute Force: OK")

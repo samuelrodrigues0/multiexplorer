@@ -2,6 +2,7 @@ from MultiExplorer.src.Infrastructure.Events import Event
 from MultiExplorer.src.Infrastructure.ExecutionFlow import Step
 from MultiExplorer.src.MultiexplorerGPGPU.Adapters import GPGPUSimulatorAdapter, DSEAdapter
 from MultiExplorer.src.CPUHeterogeneousMulticoreExploration.Presenters import NSGAPresenter
+from MultiExplorer.src.metric import *
 
 
 class GPGPUSimulationStep(Step):

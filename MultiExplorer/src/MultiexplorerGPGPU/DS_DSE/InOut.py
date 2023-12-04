@@ -46,7 +46,6 @@ class InOut(object):
             print("Json file not found")
     def performancePreditor(self):
         perf = PerformanceGPUPredictor("GTX480",1,1,self.inputFile )
-        print("testeeeeeeeeeeeeeeeeeeee")
         return perf
         
     def getInputFile(self):

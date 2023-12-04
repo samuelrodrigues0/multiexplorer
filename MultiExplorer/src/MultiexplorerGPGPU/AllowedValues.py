@@ -22,11 +22,6 @@ class Simulators(Enum):
 class PredictedModels(Enum):
     gtx480 = 1
     titanx = 2
-    armA53 = 3
-    armA57 = 4
-    atom = 5
-    quark = 6
-    smithfield = 7
 
     @staticmethod
     def belongs(value):
@@ -35,20 +30,9 @@ class PredictedModels(Enum):
     @staticmethod
     def get_label(value):
         if value == PredictedModels.gtx480:
-            return "GTX 480"
+            return "GTX_480"
         if value == PredictedModels.titanx:
-            return "Titan X"
-        if value == PredictedModels.armA53:
-            return "armA53"
-        if value == PredictedModels.armA57:
-            return "armA57"
-        if value == PredictedModels.atom:
-            return "Atom"
-        if value == PredictedModels.quark:
-            return "Quark"
-        if value == PredictedModels.smithfield:
-            return "Smithfield"
-
+            return "Titan_X"
 
         raise ValueError("Value does not corresponds to a known predicted core.")
 
@@ -56,12 +40,7 @@ class PredictedModels(Enum):
     def get_dict():
         return {
             PredictedModels.gtx480.value: PredictedModels.get_label(PredictedModels.gtx480),
-            PredictedModels.titanx.value: PredictedModels.get_label(PredictedModels.titanx),
-            PredictedModels.armA53.value: PredictedModels.get_label(PredictedModels.armA53),
-            PredictedModels.armA57.value: PredictedModels.get_label(PredictedModels.armA57),
-            PredictedModels.atom.value: PredictedModels.get_label(PredictedModels.atom),
-            PredictedModels.quark.value: PredictedModels.get_label(PredictedModels.quark),
-            PredictedModels.quark.value: PredictedModels.get_label(PredictedModels.quark),
+            PredictedModels.titanx.value: PredictedModels.get_label(PredictedModels.titanx)
         }
     
     @staticmethod
@@ -71,16 +50,6 @@ class PredictedModels(Enum):
             return "gtx480"
         elif value == PredictedModels.titanx.value:
             return "titanx"
-        elif value == PredictedModels.armA53.value:
-            return "armA53"
-        elif value == PredictedModels.armA57.value:
-            return "armA57"
-        elif value == PredictedModels.atom.value:
-            return "atom"
-        elif value == PredictedModels.quark.value:
-            return "quark"
-        elif value == PredictedModels.smithfield.value:
-            return "smithfield"
 
         raise ValueError("Value does not corresponds to a known predicted core.")
     
@@ -90,16 +59,6 @@ class PredictedModels(Enum):
             return PATH_INPUTS + "/gtx480.json"
         elif value == PredictedModels.titanx.value:
             return PATH_INPUTS + "/titanx.json"
-        elif value == PredictedModels.armA53.value:
-            return PATH_INPUTS + "/armA53.json"
-        elif value == PredictedModels.armA57.value:
-            return PATH_INPUTS + "/armA57.json"
-        elif value == PredictedModels.atom.value:
-            return PATH_INPUTS + "/atom.json"
-        elif value == PredictedModels.quark.value:
-            return PATH_INPUTS + "/quark.json"
-        elif value == PredictedModels.smithfield.value:
-            return PATH_INPUTS + "/smithfield.json"
 
         raise ValueError("Can't find default input json file for unknown/unpredicted cores.")
     
@@ -108,11 +67,8 @@ class PredictedModels(Enum):
         
         if value == PredictedModels.gtx480.value or value == PredictedModels.titanx.value:
             return "gpgpusim"
-        else:
-            return "sniper" 
 
         #raise ValueError("Can't find default input json file for unknown/unpredicted cores.")
-
 
 
 class Applications(Enum):
@@ -174,19 +130,55 @@ class Applications(Enum):
             return "asyncAPI"
         elif value == Applications.backprop.value:
             return "backprop"
-        if value == Applications.bfs.value:
+        elif value == Applications.bfs.value:
             return "bfs"
         elif value == Applications.clock.value:
             return "clock"
-        if value == Applications.dwt2d.value:
+        elif value == Applications.dwt2d.value:
             return "dwt2d"
         elif value == Applications.hotspot.value:
             return "hotspot"
-        if value == Applications.needle.value:
+        elif value == Applications.needle.value:
             return "needle"
         elif value == Applications.nn.value:
             return "nn"
-        if value == Applications.vectorAdd.value:
+        elif value == Applications.vectorAdd.value:
             return "vectorAdd"
+
+        raise ValueError("Value does not corresponds to a known predicted core.")
+
+
+class Configs(Enum):
+    gpu_gpu = 1
+    gpu_cpu = 2
+
+    @staticmethod
+    def belongs(value):
+        return value in set(item.value for item in Configs)
+
+    @staticmethod
+    def get_label(value):
+        if value == Configs.gpu_gpu:
+            return "gpu-gpu"
+        if value == Configs.gpu_cpu:
+            return "gpu-cpu"
+
+        raise ValueError("Value does not corresponds to a known predicted core.")
+
+    @staticmethod
+    def get_dict():
+        return {
+            Configs.gpu_gpu.value: Configs.get_label(Configs.gpu_gpu),
+            Configs.gpu_cpu.value: Configs.get_label(Configs.gpu_cpu),
+
+        }
+    
+    @staticmethod
+    def get_model(value):
+        # type: (int) -> str
+        if value == Configs.gpu_gpu.value:
+            return "gpu-gpu"
+        elif value == Configs.gpu_cpu.value:
+            return "gpu-cpu"
 
         raise ValueError("Value does not corresponds to a known predicted core.")

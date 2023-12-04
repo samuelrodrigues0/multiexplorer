@@ -4,7 +4,8 @@ import os
 import numpy as np
 from sklearn import metrics
 import pandas as pd
-import MultiExplorer.src.metric
+from MultiExplorer.src.metric import * #possivel problema
+from load_joblib import *
 
 class PerformanceGPUPredictor(object):
     """Main Class"""
@@ -29,17 +30,24 @@ class PerformanceGPUPredictor(object):
         #print(self.amountCore)
         #instaciou todas as variaveis com valores validos
         # neg_mean_absolute_percentage_scorer = metrics.make_scorer(mean_absolute_percentage_error, greater_is_better=False)
-        print("testeeeeeeeeeeeeeeeee", dir_path)
+
+        load_lib()
+
+
+        print('ANTES DO SELF.PREDITOR')
         self.preditor = joblib.load(dir_path+"/predictors/"+'MLP.joblib')#carregou o preditor
-        print("oi")
+        print('DEPOIS DO SELF.PREDITOR')
         self.scaler = joblib.load(dir_path+"/predictors/"+'pipe.joblib')#carregou o escalador do conjunto de entrada
         #print "Pred + Escala: " + str(self.processor) + "\n"
+
+
     def logData(self,data):
         df = pd.DataFrame ([data], columns = ['Modelo', 'App', 'Shared_Mem', 'Blocks/SM', 'Number_Registers/core','Threads/SM', 'UC', 'Inst Kernel', '%Time_Kernel', 'Freq'])
         for col in set(df.columns) - set(['Modelo', 'App']):
             df['log_'+col] = np.log(df[col])
         df=self.scaler.transform(df)
         return df
+
     def getResults(self):#prediz o desempenho do core original
         originPred=self.getOriginalPerformance(self.originCoreName,self.bdModel,self.amountOriginCore,self.sharedMem,self.blocks, self.regs,self.threads, self.app, self.bdApp, self.freq)
      
@@ -81,6 +89,6 @@ class PerformanceGPUPredictor(object):
 
         return y_pred, teste
   
-        
+
     if __name__ == "__main__":
         objPerformancePredictor = PerformancePredictor()
