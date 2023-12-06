@@ -14,6 +14,8 @@ from DbSelector import DbSelector
 
 from PerformancePredictor import PerformancePredictor
 from PerformanceGPUPredictor import PerformanceGPUPredictor
+
+from metric import *
  
 
 class InOut(object):

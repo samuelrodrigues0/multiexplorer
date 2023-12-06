@@ -11,7 +11,7 @@ import math
 # Set path to Sniper
 dir_path = os.path.dirname(os.path.realpath(__file__))
 sys.path.append(dir_path + '../../config.py')
-from MultiExplorer.src.config import PATH_SNIPER
+from config import PATH_SNIPER
 
 # Set path to the superclass SimulationTool and the path class tools at
 # Sniper Simulator

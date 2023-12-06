@@ -15,7 +15,6 @@ class Nsga2Main(object):
     """Main Class"""
 
     def __init__(self, projectFolder):
-        print("DEBUG NSGA2MAIN!")
         #print "projectFolderNSGA2MAIN:" + projectFolder
         selector= DbSelector(inputName=sys.argv[1])
         self.bd=json.loads(open(selector.select_db()).read())

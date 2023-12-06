@@ -73,9 +73,11 @@ class GPGPUSimulatorAdapter(Adapter):
     
 
     def execute(self):
+        print('\n'*3 + '-'*80 + 'Simulation' + '-'*80)
         self.prepare()
         self.sim_execute()
         self.project_folder()
+        print('\n'*3)
 
 
     def prepare(self):
@@ -238,11 +240,15 @@ class DSEAdapter(Adapter):
 
 
     def execute(self):
+        print('-'*80 + 'DSE' + '-'*80)
+
         self.prepare()
-
-        #self.dseBruteForce()
-
         self.dse()
+        if self.inputs['run_brute_force'].value is True:
+            self.dseBruteForce()
+
+        print('\n'*3)
+
 
 
     def prepare(self):
@@ -257,7 +263,6 @@ class DSEAdapter(Adapter):
 
         if self.inJson['Preferences']['DSE']:
             start = time.time()
-            print('RAPAZ... ', self.inFile)
             Nsga2Main(projectFolder)
             print("DSE NSGA2: OK") 
             end = time.time()
@@ -269,11 +274,6 @@ class DSEAdapter(Adapter):
         neg_mean_absolute_percentage_scorer = metrics.make_scorer(mean_absolute_percentage_error, greater_is_better=False)
         if self.inJson['Preferences']['DSE']:
             start = time.time()
-            print('\n\n')
-            print("DseBruteFORCE:")
-            print('\n\n')
-            print("JSON FILE: ", self.inFile)
-            print("PROJECT FOLDER: ", projectFolder)
             DsDseBruteForce(projectFolder, pathCSV=self.inFile)
             end = time.time()
             print("DSE Brute Force: OK")

@@ -42,8 +42,6 @@ class GPGPU(SimulationTool.SimulationTool):
         self.geral = self.config['General_Modeling']
         self.outFile= self.createInputFolder(self.geral)
         self.foldername = self.geral['model_name'] + '_' + self.app
-        print("FOLDERNAMEEEEEEEEEEEEEEEEEEEE>>>>> ", self.foldername)
-
        
         try: 
             gpuConfigFolders= [f for f in os.listdir(CONFIGPATH)]
@@ -99,7 +97,6 @@ class GPGPU(SimulationTool.SimulationTool):
         if not os.path.exists(DirName):
             os.makedirs(DirName)
 
-        print("DIRNMAE: ", DirName)
         return DirName 
 
 
@@ -191,7 +188,6 @@ class GPGPU(SimulationTool.SimulationTool):
     def parse(self):
         self.configParser()
         self.xmlParser()
-        print("OUTFILE: ", self.outFile)
 
         
     def execute(self):
