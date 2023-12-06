@@ -243,9 +243,11 @@ class DSEAdapter(Adapter):
         print('-'*80 + 'DSE' + '-'*80)
 
         self.prepare()
-        self.dse()
-        if self.inputs['run_brute_force'].value is True:
+        
+        if self.inputs['dse_Settings']['run_brute_force']:
             self.dseBruteForce()
+
+        self.dse()
 
         print('\n'*3)
 
