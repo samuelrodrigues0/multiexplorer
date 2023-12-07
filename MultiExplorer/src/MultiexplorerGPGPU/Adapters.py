@@ -40,25 +40,124 @@ class GPGPUSimulatorAdapter(Adapter):
 
         self.set_inputs([
             InputGroup({
-                'label': "Settings",
-                'key': 'Settings',
+                'label': None,
+                'key': 'settings',
                 "inputs": [
-                    Input({
-                        "label" : "Model",
-                        "key" : "model",
-                        "is_user_input" : True,
-                        "required" : True,
-                        "allowed_values" : PredictedModels.get_dict(),
+                    InputGroup({
+                        'label': "Model Settings",
+                        'key': "model",
+                        "inputs": [
+                            Input({
+                                "label" : "Model",
+                                "key" : "model",
+                                "is_user_input" : True,
+                                "required" : True,
+                                "allowed_values" : PredictedModels.get_dict(),
+                            }),
+                            Input({
+                                "label" : "Application",
+                                "key" : "app",
+                                "is_user_input" : True,
+                                "required" : True,
+                                "allowed_values" : Applications.get_dict()
                     }),
-                    Input({
-                        "label" : "Application",
-                        "key" : "app",
-                        "is_user_input" : True,
-                        "required" : False,
-                        "allowed_values" : Applications.get_dict()
+                        ]
+
+                    }),
+                    InputGroup({
+                        'label': "General_modeling",
+                        'key': 'general_modeling',
+                        "inputs": [
+                            Input({
+                                "label" : "Clock Rate",
+                                "key" : "clock_rate",
+                                'type': InputType.Float,
+                                "is_user_input": True,
+                                "required": True,
+                            #  "default_value":1
+                            }),
+                            Input({
+                                "label" : "n_SM",
+                                "key" : "n_SM",
+                                'type': InputType.Float,
+                                "is_user_input": True,
+                                "required": True,
+                                #"default_value":1
+                            }),
+                            Input({
+                                "label" : "Shmem Size",
+                                "key" : "shmem_size",
+                                'type': InputType.Float,
+                                "is_user_input": True,
+                                "required": True,
+                                #"default_value":1
+                            }),
+                            Input({
+                                "label" : "Registers",
+                                "key" : "registers",
+                                'type': InputType.Float,
+                                "is_user_input": True,
+                                "required": True,
+                                #"default_value":1
+                            }),
+                            Input({
+                                "label" : "Blocks/SM",
+                                "key" : "blocks/SM",
+                                'type': InputType.Float,
+                                "is_user_input": True,
+                                "required": True,
+                                #"default_value":1
+                            }),
+                            Input({
+                                "label" : "Threads/SM",
+                                "key" : "threads/SM",
+                                'type': InputType.Float,
+                                "is_user_input": True,
+                                "required": True,
+                                #"default_value":1
+                            }),
+                            Input({
+                                "label" : "GpuWattch",
+                                "key" : "gpuwattch",
+                                'type': InputType.Float,
+                                "is_user_input": True,
+                                "required": True,
+                                #"default_value":1
+                            })
+                        ]
+                    }),
+                    InputGroup({
+                        'label': "Power",
+                        'key': 'power',
+                        "inputs": [
+                            Input({
+                                "label" : "Vdd",
+                                "key" : "vdd",
+                                'type': InputType.Float,
+                                "is_user_input": True,
+                                "required": True,
+                                #"default_value":1
+                            }),
+                            Input({
+                                "label" : "Technology Node",
+                                "key" : "technology_node",
+                                'type': InputType.Float,
+                                "is_user_input": True,
+                                "required": True,
+                                #"default_value":1
+                            }),
+                            Input({
+                                "label" : "Temperature",
+                                "key" : "temperature",
+                                'type': InputType.Float,
+                                "is_user_input": True,
+                                "required": True,
+                                #"default_value":1
+                            }),
+                        ]
                     })
                 ]
-            }),
+            })
         ])
 
         self.inFile = None
