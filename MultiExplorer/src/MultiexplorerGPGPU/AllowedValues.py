@@ -47,9 +47,9 @@ class PredictedModels(Enum):
     def get_model(value):
         # type: (int) -> str
         if value == PredictedModels.gtx480.value:
-            return "gtx480"
+            return "GTX480"
         elif value == PredictedModels.titanx.value:
-            return "titanx"
+            return "TITANX"
 
         raise ValueError("Value does not corresponds to a known predicted core.")
     
@@ -180,5 +180,95 @@ class Configs(Enum):
             return "gpu-gpu"
         elif value == Configs.gpu_cpu.value:
             return "gpu-cpu"
+
+        raise ValueError("Value does not corresponds to a known predicted core.")
+    
+
+class Technology_configs(Enum):
+    nm22 = 1
+    nm32 = 2
+    nm45 = 3
+    nm90 = 4
+
+    @staticmethod
+    def belongs(value):
+        return value in set(item.value for item in Technology_configs)
+
+    @staticmethod
+    def get_label(value):
+        if value == Technology_configs.nm22:
+            return "22nm"
+        if value == Technology_configs.nm32:
+            return "32nm"
+        if value == Technology_configs.nm45:
+            return "45nm"
+        if value == Technology_configs.nm90:
+            return "90nm"
+
+        raise ValueError("Value does not corresponds to a known predicted core.")
+
+    @staticmethod
+    def get_dict():
+        return {
+            Technology_configs.nm22.value: Technology_configs.get_label(Technology_configs.nm22),
+            Technology_configs.nm32.value: Technology_configs.get_label(Technology_configs.nm32),
+            Technology_configs.nm45.value: Technology_configs.get_label(Technology_configs.nm45),
+            Technology_configs.nm90.value: Technology_configs.get_label(Technology_configs.nm90)
+
+        }
+    
+    @staticmethod
+    def get_model(value):
+        # type: (int) -> str
+        if value == Technology_configs.nm22.value:
+            return "22"
+        elif value == Technology_configs.nm32.value:
+            return "32"
+        elif value == Technology_configs.nm45.value:
+            return "45"
+        elif value == Technology_configs.nm90.value:
+            return "90"
+
+        raise ValueError("Value does not corresponds to a known predicted core.")
+    
+
+class Db_app(Enum):
+    clock = 1
+    asyncAPI = 2
+    all = 3
+
+    @staticmethod
+    def belongs(value):
+        return value in set(item.value for item in Db_app)
+
+    @staticmethod
+    def get_label(value):
+        if value == Db_app.clock:
+            return "clock"
+        if value == Db_app.asyncAPI:
+            return "asyncAPI"
+        #if value == Db_app.all:
+         #   return "all"
+
+        raise ValueError("Value does not corresponds to a known predicted core.")
+
+    @staticmethod
+    def get_dict():
+        return {
+            Db_app.clock.value: Db_app.get_label(Db_app.clock),
+            Db_app.asyncAPI.value: Db_app.get_label(Db_app.asyncAPI),
+            #Db_app.all.value: Db_app.get_label(Db_app.all),
+
+        }
+    
+    @staticmethod
+    def get_model(value):
+        # type: (int) -> str
+        if value == Db_app.clock.value:
+            return "clock"
+        elif value == Db_app.asyncAPI.value:
+            return "asyncAPI"
+        #elif value == Db_app.all.value:
+        #    return "all"
 
         raise ValueError("Value does not corresponds to a known predicted core.")

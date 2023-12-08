@@ -5,7 +5,7 @@ class DbSelector(object):
     ''' This class makes the selection of json file 
         concerning the data base.
     '''
-    def __init__(self, inputPath=os.path.dirname(os.path.realpath(__file__))+'/', inputName=sys.argv[1]):
+    def __init__(self, inputName, inputPath=os.path.dirname(os.path.realpath(__file__))+'/'):
         #print "\n"+inputName
 
         #self.input = json.loads(open(str(inputPath)+inputName).read())

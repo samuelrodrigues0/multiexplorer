@@ -11,18 +11,18 @@ class DsDseBruteForce(object):
 
     """Main Class"""
 
-    def __init__(self, projectFolder, pathCSV=sys.argv[1], path_db=DbSelector(inputName=sys.argv[1]).select_db()):
+    def __init__(self, projectFolder, pathCSV):
         
-        self.inputDict= InOut(projectFolder).makeInputDict()
-        self.preditor= InOut(projectFolder).performancePreditor()
+        path_db=DbSelector(inputName=pathCSV).select_db()
+        self.inputDict= InOut(projectFolder, inputName=pathCSV).makeInputDict()
+        self.preditor= InOut(projectFolder, inputName=pathCSV).performancePreditor()
         #print(self.inputDict)
         self.db = json.loads(open(path_db).read())
         self.pathCSV=projectFolder+"/outputBruteForce.csv"
         self.first_solution = [] #plataformas que obedecem a restricao de area 
         self.final_solution = [] #plataformas que obedecem a restrição de area e tem performance maxima
         self.projectFolder = projectFolder
-        self.multiexplorerInputDict= InOut(projectFolder).getInputFile()
-        
+        self.multiexplorerInputDict= InOut(projectFolder, inputName=pathCSV).getInputFile()
         self.combinations()        
         self.printCSV()
 

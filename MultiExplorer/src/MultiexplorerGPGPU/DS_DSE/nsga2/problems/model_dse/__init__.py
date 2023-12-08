@@ -11,8 +11,9 @@ import functools
 
 class DS_DSE(Problem):
     """ Definition of DS_DSE problem"""
-    def __init__(self, DSEDefinitions, projectFolder, path_db = DbSelector(inputName=sys.argv[1]).select_db()):
-        inputNsga= InOut(projectFolder)
+    def __init__(self, DSEDefinitions, projectFolder, inputName):
+        path_db = DbSelector(inputName).select_db()
+        inputNsga= InOut(projectFolder, inputName)
         self.dict_entry= inputNsga.makeInputDict()
         self.dse_definitions = DSEDefinitions
         self.max_objectives = [None, None, None]

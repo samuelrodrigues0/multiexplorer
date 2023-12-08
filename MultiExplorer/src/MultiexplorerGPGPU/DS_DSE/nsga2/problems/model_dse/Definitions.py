@@ -9,9 +9,9 @@ from InOut import InOut
 
 class Definitions(ProblemDefinitions):
 
-    def __init__(self,projectFolder):
+    def __init__(self, projectFolder, inputName):
         self.n = 10
-        self.performancePreditor = InOut(projectFolder).performancePreditor()
+        self.performancePreditor = InOut(projectFolder, inputName).performancePreditor()
         self.contador = 0
     
 

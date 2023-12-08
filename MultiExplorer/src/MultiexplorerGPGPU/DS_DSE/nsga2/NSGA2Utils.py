@@ -11,7 +11,7 @@ import random
 from InOut import InOut
 class NSGA2Utils(object):
 
-    def __init__(self, problem, num_of_individuals, projectFolder, mutation_rate= 0.9 ,mutation_strength=0.01, num_of_genes_to_mutate=2, num_of_tour_particips=2):
+    def __init__(self, problem, num_of_individuals, projectFolder, inputName, mutation_rate= 0.9 ,mutation_strength=0.01, num_of_genes_to_mutate=2, num_of_tour_particips=2):
 
         self.problem = problem
         self.num_of_individuals = num_of_individuals
@@ -21,7 +21,7 @@ class NSGA2Utils(object):
         self.num_of_tour_particips = num_of_tour_particips
 
         self.bd= json.loads(open(DbSelector(inputName=sys.argv[1]).select_db()).read())
-        inputNsga= InOut(projectFolder)
+        inputNsga= InOut(projectFolder, inputName)
         self.dict_entry= inputNsga.makeInputDict()
 
     def fast_nondominated_sort(self, population):

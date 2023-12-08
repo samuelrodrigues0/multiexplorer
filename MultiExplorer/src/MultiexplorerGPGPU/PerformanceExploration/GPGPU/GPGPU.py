@@ -14,6 +14,7 @@ from MultiExplorer.src.config import GPU_PATH
 from MultiExplorer.src.MultiexplorerGPGPU.PerformanceExploration.SimulationTool import SimulationTool
 dir_path = os.path.dirname(os.path.realpath(__file__))
 #sys.path.append(dir_path + '../../config.py')
+from MultiExplorer.src.MultiexplorerGPGPU.AllowedValues import PredictedModels
 
 
 
@@ -28,24 +29,24 @@ class GPGPU(SimulationTool.SimulationTool):
         This class makes the interface between MultiExplorer and GPGPU-Sim
     """
 
-    def __init__(self, jsonFile="input.json", app="clock",paramMap= "paramMap.json", directory_out=SIM_OUT, outJson=None):
+    def __init__(self, input=None, jsonFile="input.json", app="clock",paramMap= "paramMap.json", directory_out=SIM_OUT, outJson=None):
         super(GPGPU, self).__init__(jsonFile, paramMap, outJson)
         self.jsonFile = jsonFile
-        #print('JSON_FILE = ', self.jsonFile)
         self.outJson = outJson
         with open(dir_path + '/' + paramMap) as data_file:
             self.paramMap = json.load(data_file)
         self.appConfig = os.path.join(dir_path+"/"+ "appconfig.json")
         self.config = json.load(open(self.jsonFile))
-        #self.app = self.config['Preferences']['application']
         self.app = app
-        self.geral = self.config['General_Modeling']
+        #self.geral = self.config['General_Modeling']
+        self.geral = input.get_dict()
         self.outFile= self.createInputFolder(self.geral)
-        self.foldername = self.geral['model_name'] + '_' + self.app
+        #self.foldername = self.geral['model_name'] + '_' + self.app
+        self.foldername = PredictedModels.get_model(self.geral['model_name']) + '_' + self.app
        
         try: 
             gpuConfigFolders= [f for f in os.listdir(CONFIGPATH)]
-            self.gpuInputFolder = [x for x in gpuConfigFolders if x.endswith(self.geral["model_name"])][0]
+            self.gpuInputFolder = [x for x in gpuConfigFolders if x.endswith(PredictedModels.get_model(self.geral['model_name']))][0]
         except:
             raise Exception("Model name not found ()")
 
@@ -72,7 +73,7 @@ class GPGPU(SimulationTool.SimulationTool):
             elif param =="power_simulation_enabled" and line.startswith("-"+param):
                 line = aux[0]+ " "+ str(inputValue)+"\n"
                 if self.geral[paramDict["power_simulation_enabled"]]:
-                    line = line+ "-gpuwattch_xml_file gpuwattch_"+str(self.geral["model_name"]).lower()+".xml\n"
+                    line = line+ "-gpuwattch_xml_file gpuwattch_"+str(PredictedModels.get_model(self.geral['model_name'])).lower()+".xml\n"
             elif line.startswith("-"+param):
                 line = aux[0]+ " "+ str(inputValue)+"\n"
         return line 
@@ -155,7 +156,7 @@ class GPGPU(SimulationTool.SimulationTool):
 
     def xmlParser(self):
         if self.geral["gpuwattch"]:
-            dstFile =os.path.join(SIM_OUT+"/"+ self.outFile+"/gpuwattch_"+str(self.geral["model_name"]).lower()+".xml")
+            dstFile =os.path.join(SIM_OUT+"/"+ self.outFile+"/gpuwattch_"+str(PredictedModels.get_model(self.geral['model_name'])).lower()+".xml")
             #print(dstFile)
             origFile=os.path.join(dir_path+"/gpuwattch.xml")
 
@@ -168,7 +169,8 @@ class GPGPU(SimulationTool.SimulationTool):
                 elif paramAttrib["name"] == "target_core_clockrate" or paramAttrib["name"] == "clock_rate" :
                     paramAttrib["value"]= str(self.geral["clock_rate"])
                 elif paramAttrib["name"] == "core_tech_node" or paramAttrib["name"] == "mem_tech_node" : 
-                    paramAttrib["value"]= str(self.geral["power"]["technology_node"])
+                    #paramAttrib["value"]= str(self.geral["power"]["technology_node"])
+                    paramAttrib["value"]= str(self.geral["technology_node"])
             mytree.write(dstFile)
                 
 

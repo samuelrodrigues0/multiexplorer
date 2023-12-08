@@ -6,7 +6,7 @@ import re
 from typing import Dict, Union, Any, Optional
 from xml.dom import minidom
 from xml.etree import ElementTree
-from MultiExplorer.src.MultiexplorerGPGPU.AllowedValues import PredictedModels, Applications, Configs
+from MultiExplorer.src.MultiexplorerGPGPU.AllowedValues import PredictedModels, Applications, Configs, Technology_configs, Db_app
 from MultiExplorer.src.Infrastructure.ExecutionFlow import Adapter
 from MultiExplorer.src.Infrastructure.Inputs import Input, InputGroup, InputType
 from MultiExplorer.src.config import PATH_PRED_VM
@@ -45,11 +45,11 @@ class GPGPUSimulatorAdapter(Adapter):
                 "inputs": [
                     InputGroup({
                         'label': "Model Settings",
-                        'key': "model",
+                        'key': "model_settings",
                         "inputs": [
                             Input({
                                 "label" : "Model",
-                                "key" : "model",
+                                "key" : "model_name",
                                 "is_user_input" : True,
                                 "required" : True,
                                 "allowed_values" : PredictedModels.get_dict(),
@@ -71,58 +71,58 @@ class GPGPUSimulatorAdapter(Adapter):
                             Input({
                                 "label" : "Clock Rate",
                                 "key" : "clock_rate",
-                                'type': InputType.Float,
+                                'type': InputType.Integer,
                                 "is_user_input": True,
                                 "required": True,
-                            #  "default_value":1
+                                "default_value":1
                             }),
                             Input({
                                 "label" : "n_SM",
                                 "key" : "n_SM",
-                                'type': InputType.Float,
+                                'type': InputType.Integer,
                                 "is_user_input": True,
                                 "required": True,
-                                #"default_value":1
+                                "default_value":1
                             }),
                             Input({
                                 "label" : "Shmem Size",
                                 "key" : "shmem_size",
-                                'type': InputType.Float,
+                                'type': InputType.Integer,
                                 "is_user_input": True,
                                 "required": True,
-                                #"default_value":1
+                                "default_value":1
                             }),
                             Input({
                                 "label" : "Registers",
                                 "key" : "registers",
-                                'type': InputType.Float,
+                                'type': InputType.Integer,
                                 "is_user_input": True,
                                 "required": True,
-                                #"default_value":1
+                                "default_value":1
                             }),
                             Input({
                                 "label" : "Blocks/SM",
                                 "key" : "blocks/SM",
-                                'type': InputType.Float,
+                                'type': InputType.Integer,
                                 "is_user_input": True,
                                 "required": True,
-                                #"default_value":1
+                                "default_value":1
                             }),
                             Input({
                                 "label" : "Threads/SM",
                                 "key" : "threads/SM",
-                                'type': InputType.Float,
+                                'type': InputType.Integer,
                                 "is_user_input": True,
                                 "required": True,
-                                #"default_value":1
+                                "default_value":1
                             }),
                             Input({
                                 "label" : "GpuWattch",
                                 "key" : "gpuwattch",
-                                'type': InputType.Float,
+                                'type': InputType.Checkbutton,
                                 "is_user_input": True,
                                 "required": True,
-                                #"default_value":1
+                                "value":True
                             })
                         ]
                     }),
@@ -136,15 +136,14 @@ class GPGPUSimulatorAdapter(Adapter):
                                 'type': InputType.Float,
                                 "is_user_input": True,
                                 "required": True,
-                                #"default_value":1
+                                "default_value":1
                             }),
                             Input({
                                 "label" : "Technology Node",
                                 "key" : "technology_node",
-                                'type': InputType.Float,
-                                "is_user_input": True,
-                                "required": True,
-                                #"default_value":1
+                                "is_user_input": False,
+                                "required": False,
+                                "allowed_values" : Technology_configs.get_dict()
                             }),
                             Input({
                                 "label" : "Temperature",
@@ -152,7 +151,7 @@ class GPGPUSimulatorAdapter(Adapter):
                                 'type': InputType.Float,
                                 "is_user_input": True,
                                 "required": True,
-                                #"default_value":1
+                                "default_value":1
                             }),
                         ]
                     })
@@ -176,6 +175,7 @@ class GPGPUSimulatorAdapter(Adapter):
         self.prepare()
         self.sim_execute()
         self.project_folder()
+        self.change_json_in_project_folder()
         print('\n'*3)
 
 
@@ -183,20 +183,19 @@ class GPGPUSimulatorAdapter(Adapter):
         
         global jsonLocation
 
-        self.inFile = PredictedModels.get_json_path(self.inputs['Settings']['model'])
+        self.inFile = PredictedModels.get_json_path(self.inputs['settings']["model_settings"]['model_name'])
         jsonLocation = self.inFile
 
         with open(self.inFile) as data_file:
             self.inJson = json.load(data_file)
-            
-        self.simTool = GPGPU(self.inFile, app=Applications.get_model(self.inputs['Settings']['app']))
 
+        self.simTool = GPGPU(input=self.inputs['settings'], jsonFile=self.inFile, app=Applications.get_model(self.inputs['settings']["model_settings"]['app']))
 
 
     def sim_execute(self):
         self.simTool.parse()
         self.simTool.execute()
-        self.simTool.convertResults()
+        #self.simTool.convertResults()
  
 
     def project_folder(self):
@@ -208,11 +207,47 @@ class GPGPUSimulatorAdapter(Adapter):
         sorted_dirs = sorted(dirs, key=lambda d: os.path.getctime(os.path.join(path, d)), reverse=True)
         projectFolder = path + sorted_dirs[0]
 
+
         """if PredictedModels.get_sim_tool(self.inputs['Settings']['model']) == "gpgpusim":
                 for f in os.listdir(PATH_RUNDIR + '/Multiexplorer_GPGPU/'):
                     if f.startswith(self.inJson['Preferences']['project_name']):
                         projectFolder=os.path.join("rundir/Multiexplorer_GPGPU/", f)
                         break  """
+
+
+    def change_json_in_project_folder(self):
+        
+        dirs = os.listdir(projectFolder)
+        json_dirs = [x for x in dirs if x.endswith(".json")]
+
+        if len(json_dirs) == 1:
+            json_path = projectFolder + '/' + json_dirs[0]
+        else:
+            raise Exception("More than one .json in project folder")
+        
+        gui_data = self.inputs['settings'].get_dict()
+        
+        with open(json_path) as data_file:
+            json_data = json.load(data_file)
+            
+        json_data['Preferences']['application'] = Applications.get_model(gui_data['app'])
+        json_data['Preferences']['project_name'] = PredictedModels.get_model(gui_data['model_name']) + '_' + Applications.get_model(gui_data['app'])
+        json_data['General_Modeling']['clock_rate'] = gui_data['clock_rate']
+        json_data['General_Modeling']['n_SM'] = gui_data['n_SM']
+        json_data['General_Modeling']['shmem_size'] = gui_data['shmem_size']
+        json_data['General_Modeling']['registers'] = gui_data['registers']
+        json_data['General_Modeling']['blocks/SM'] = gui_data['blocks/SM']
+        json_data['General_Modeling']['threads/SM'] = gui_data['threads/SM']
+        if gui_data['gpuwattch']:
+            json_data['General_Modeling']['gpuwattch'] = 1
+        else:
+            json_data['General_Modeling']['gpuwattch'] = 0     
+        json_data['General_Modeling']['power']['vdd'] = str(gui_data['vdd'])
+        #json_data['General_Modeling']['power']['technology_node'] = Technology_configs.get_model(gui_data['technology_node'])
+        json_data['General_Modeling']['power']['temperature'] = str(gui_data['temperature'])
+
+        with open(json_path, 'w') as data_file:
+            json.dump(json_data, data_file, indent=2)
 
 
 class DSEAdapter(Adapter):
@@ -222,113 +257,126 @@ class DSEAdapter(Adapter):
 
         self.set_inputs([
             InputGroup({
-                'label': "DSE Settings",
-                'key': 'dse_Settings',
+                'label': None,
+                'key': 'settings',
                 "inputs": [
                     Input({
-                        'label': 'Run brute force aswell',
-                        'key': 'run_brute_force',
+                        'label': 'Db Experiment Application',
+                        'key': 'db_app',
                         "is_user_input": True,
-                        "required": False,
-                        'type': InputType.Checkbutton,
-                        'value': True,
+                        "required": True,
+                        "allowed_values" : Db_app.get_dict()
                     }),
-                    Input({
-                        "label" : "DSE Config",
-                        "key" : "dse_config",
-                        "is_user_input" : True,
-                        "required" : False,
-                        "allowed_values" : Configs.get_dict()
+                    InputGroup({
+                        'label': "DSE Settings",
+                        'key': 'dse_settings',
+                        "inputs": [
+                            Input({
+                                'label': 'Run brute force aswell',
+                                'key': 'run_brute_force',
+                                "is_user_input": True,
+                                "required": False,
+                                'type': InputType.Checkbutton,
+                                'value': True,
+                            }),
+                            Input({
+                                "label" : "DSE Config",
+                                "key" : "dse_config",
+                                "is_user_input" : True,
+                                "required" : False,
+                                "allowed_values" : Configs.get_dict()
+                            })
+                        ]
+                    }),
+                    InputGroup({
+                        'label': "Exploration Space",
+                        'key': 'exploration_space',
+                        'inputs': [
+                            Input({
+                                'label': 'GPU Cores for design',
+                                'key': 'gpu_cores_for_design',
+                                "is_user_input": True,
+                                "required": True,
+                                'type': InputType.IntegerRange,
+                                'min_val': 1,
+                                'max_val': 31,
+                            }),
+                            Input({
+                                'label': 'Original Cores for design',
+                                'key': 'original_cores_for_design',
+                                "is_user_input": True,
+                                "required": True,
+                                "type": InputType.IntegerRange,
+                                "min_val": 1,
+                                "max_val": 32,
+                            })
+                        ],
+                    }),
+                    InputGroup({
+                        'label': "Constraints",
+                        'key': 'constraints',
+                        'inputs': [
+                            Input({
+                                'label': 'Maximum Power Density',
+                                'unit': 'V/mm²',
+                                'key': 'maximum_power_density',
+                                'type': InputType.Float,
+                                "is_user_input": True,
+                                "required": True,
+                                "default_value":1
+                            }),
+                            Input({
+                                'label': 'Maximum Area',
+                                'unit': 'mm²',
+                                'key': 'maximum_area',
+                                'type': InputType.Float,
+                                "is_user_input": True,
+                                "required": True,
+                                "default_value":1
+                            }),
+                        ],
+                    }),
+                    InputGroup({
+                        'label': "NSGA-II Parameters",
+                        'key': 'nsga_parameters',
+                        'inputs': [
+                            Input({
+                                'label': 'Crossing Rate',
+                                'unit': '%',
+                                'key': 'mutation_strength',
+                                'type': InputType.Float,
+                                "is_user_input": True,
+                                "required": True,
+                                "default_value": 50.0,
+                            }),
+                            Input({
+                                'label': 'Mutation Rate',
+                                'unit': '%',
+                                'key': 'mutation_rate',
+                                'type': InputType.Float,
+                                "is_user_input": True,
+                                "required": True,
+                                "default_value": 10.0,
+                            }),
+                            Input({
+                                'label': 'Population Size',
+                                'key': 'num_of_individuals',
+                                'type': InputType.Integer,
+                                "is_user_input": True,
+                                "required": True,
+                                "default_value": 10
+                            }),
+                            Input({
+                                'label': 'Number of Generations',
+                                'key': 'num_of_generations',
+                                'type': InputType.Integer,
+                                "is_user_input": True,
+                                "required": True,
+                                "default_value": 150
+                            }),
+                        ],
                     })
                 ]
-            }),
-            InputGroup({
-                'label': "Exploration Space",
-                'key': 'exploration_space',
-                'inputs': [
-                    Input({
-                        'label': 'GPU Cores for design',
-                        'key': 'gpu_cores_for_design',
-                        "is_user_input": True,
-                        "required": False,
-                        'type': InputType.IntegerRange,
-                        'min_val': 1,
-                        'max_val': 31,
-                    }),
-                    Input({
-                        'label': 'Original Cores for design',
-                        'key': 'original_cores_for_design',
-                        "is_user_input": True,
-                        "required": False,
-                        "type": InputType.IntegerRange,
-                        "min_val": 1,
-                        "max_val": 32,
-                    })
-                ],
-            }),
-            InputGroup({
-                'label': "Constraints",
-                'key': 'constraints',
-                'inputs': [
-                    Input({
-                        'label': 'Maximum Power Density',
-                        'unit': 'V/mm²',
-                        'key': 'maximum_power_density',
-                        'type': InputType.Float,
-                        "is_user_input": True,
-                        "required": True,
-                        "default_value":1
-                    }),
-                    Input({
-                        'label': 'Maximum Area',
-                        'unit': 'mm²',
-                        'key': 'maximum_area',
-                        'type': InputType.Float,
-                        "is_user_input": True,
-                        "required": True,
-                        "default_value":1
-                    }),
-                ],
-            }),
-            InputGroup({
-                'label': "NSGA-II Parameters",
-                'key': 'nsga_parameters',
-                'inputs': [
-                    Input({
-                        'label': 'Crossing Rate',
-                        'unit': '%',
-                        'key': 'mutation_strength',
-                        'type': InputType.Float,
-                        "is_user_input": True,
-                        "required": True,
-                        "default_value": 50.0,
-                    }),
-                    Input({
-                        'label': 'Mutation Rate',
-                        'unit': '%',
-                        'key': 'mutation_rate',
-                        'type': InputType.Float,
-                        "is_user_input": True,
-                        "required": True,
-                        "default_value": 10.0,
-                    }),
-                    Input({
-                        'label': 'Population Size',
-                        'key': 'num_of_individuals',
-                        'type': InputType.Integer,
-                        "is_user_input": True,
-                        "required": True,
-                        "default_value": 10
-                    }),
-                    Input({
-                        'label': 'Number of Generations',
-                        'key': 'num_of_generations',
-                        'type': InputType.Integer,
-                        "is_user_input": True,
-                        "required": True,
-                        "default_value": 150
-                    }),
-                ],
             })
         ])
 
@@ -342,14 +390,15 @@ class DSEAdapter(Adapter):
         print('-'*80 + 'DSE' + '-'*80)
 
         self.prepare()
-        
-        if self.inputs['dse_Settings']['run_brute_force']:
-            self.dseBruteForce()
 
-        self.dse()
+        mod_json_path = self.change_json_in_project_folder()
+        
+        if self.inputs['settings']['dse_settings']['run_brute_force']:
+            self.dseBruteForce(mod_json_path)
+
+        self.dse(mod_json_path)
 
         print('\n'*3)
-
 
 
     def prepare(self):
@@ -360,23 +409,52 @@ class DSEAdapter(Adapter):
             self.inJson = json.load(data_file)
 
 
-    def dse(self):
+    def change_json_in_project_folder(self):
+        
+        dirs = os.listdir(projectFolder)
+        json_dirs = [x for x in dirs if x.endswith(".json")]
 
-        if self.inJson['Preferences']['DSE']:
-            start = time.time()
-            Nsga2Main(projectFolder)
-            print("DSE NSGA2: OK") 
-            end = time.time()
-            print("The time of execution of NSGA program is :", end-start)
-            #self.suggestedArchitecture()
+        if len(json_dirs) == 1:
+            json_path = projectFolder + '/' + json_dirs[0]
+        else:
+            raise Exception("More than one .json in project folder")
+        
+        gui_data = self.inputs['settings'].get_dict()
+        
 
-    def dseBruteForce(self):
+        with open(json_path) as data_file:
+            json_data = json.load(data_file)
+   
+        json_data['DSE']['ExplorationSpace']['ip_cores_for_design'][0] = gui_data['gpu_cores_for_design'][0]
+        json_data['DSE']['ExplorationSpace']['ip_cores_for_design'][1] = gui_data['gpu_cores_for_design'][1]
+        json_data['DSE']['ExplorationSpace']['original_cores_for_design'][0] = gui_data['original_cores_for_design'][0]
+        json_data['DSE']['ExplorationSpace']['original_cores_for_design'][1] = gui_data['original_cores_for_design'][1]
+        json_data['DSE']['Constraints']['maximum_powerDensity'] = gui_data['maximum_power_density']
+        json_data['DSE']['Constraints']['maximum_area'] = gui_data['maximum_area']
+        json_data['DSE']['Constraints']['application'] = Db_app.get_model(gui_data['db_app'])
+
+        with open(json_path, 'w') as data_file:
+            json.dump(json_data, data_file, indent=2)
+
+        return json_path
+
+
+    def dse(self, json_project_folder):
+    
+        start = time.time()
+        Nsga2Main(projectFolder, inputName=json_project_folder)
+        print("DSE NSGA2: OK") 
+        end = time.time()
+        print("The time of execution of NSGA program is :", end-start)
+        #self.suggestedArchitecture()
+
+
+    def dseBruteForce(self, json_project_folder):
 
         neg_mean_absolute_percentage_scorer = metrics.make_scorer(mean_absolute_percentage_error, greater_is_better=False)
-        if self.inJson['Preferences']['DSE']:
-            start = time.time()
-            DsDseBruteForce(projectFolder, pathCSV=self.inFile)
-            end = time.time()
-            print("DSE Brute Force: OK")
-            print("The time of execution of BF program is :", end-start)
+        start = time.time()
+        DsDseBruteForce(projectFolder, pathCSV=json_project_folder)
+        end = time.time()
+        print("DSE Brute Force: OK")
+        print("The time of execution of BF program is :", end-start)
 

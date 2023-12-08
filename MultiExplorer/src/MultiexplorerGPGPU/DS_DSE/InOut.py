@@ -21,19 +21,18 @@ from metric import *
 class InOut(object):
     """ This class makes the interface between user entry and input of nsga, and also, makes de output of algorithm nsga.
     """
-    def __init__(self, projectFolder):
+    def __init__(self, projectFolder, inputName):
 
         self.projectFolder = projectFolder
         self.inputPathForMCPATFile = str(projectFolder)+"/MCPATPhysicalResults.txt"        
         self.inputPathForSNIPERFile = str(projectFolder)+"/simplePerformanceValue"
         self.outputPath = ""
-        self.inputName = sys.argv[1]
+        self.inputName = inputName
         self.outputName = str(projectFolder)+"/populationResults.json"
         self.jsonFile = None
         self.objDict = {}
         self.inputDict = {}
         
-
         self.selector= DbSelector(self.inputName)
         try:
             for f in os.listdir(str(projectFolder)):
@@ -46,6 +45,8 @@ class InOut(object):
                     #print(self.inputFile)
         except: 
             print("Json file not found")
+
+
     def performancePreditor(self):
         perf = PerformanceGPUPredictor("GTX480",1,1,self.inputFile )
         return perf
@@ -208,9 +209,11 @@ class InOut(object):
             physicalDict["amount_original_cores"] = self.inputFile["General_Modeling"]["total_cores"]
             #print(self.inputFile)
 
+
         physicalDict["area_orig"]= self.selector.get_power_area_in_db()[1] 
         physicalDict["power_orig"]=self.selector.get_power_area_in_db()[0]
-        
+
+
         return physicalDict
 
 
@@ -248,6 +251,8 @@ class InOut(object):
         #power_orig --> é a potência do core original
         #performance_orig --> é a performance do core original, obtida através de algum simulador de performance, por exemplo, sniper ou multi2sim
         #amount_ip_cores --> é a quantidade de cores ip, que serão acrescentados no projeto (cores ip, são cores diferentes do original)
+
+
         def setDefault():
             print "-> default DSE input"
             parameters = {}
@@ -273,9 +278,10 @@ class InOut(object):
         def setInputDict(descriptionInput):
             parameters = {}
             restriction = {}
-
+            ########################
             mcpat = self.readPhysicalParamsFromDB()
             performanceSim = self.readInputFromPerformanceSim()
+
 
             min_orig_core=descriptionInput["DSE"]["ExplorationSpace"]["original_cores_for_design"][0]
             max_orig_core=descriptionInput["DSE"]["ExplorationSpace"]["original_cores_for_design"][1]
@@ -298,6 +304,7 @@ class InOut(object):
             self.inputDict["restrictions"] = restriction
 
             return self.inputDict
+
 
         descriptionInput = json.loads(open(self.inputName).read())
         #verificar se tem chave DSE, caso tenha, criar dicionário com o que o usuário passou no arquivo de entrada

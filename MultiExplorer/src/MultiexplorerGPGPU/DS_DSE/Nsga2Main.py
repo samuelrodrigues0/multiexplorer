@@ -14,24 +14,24 @@ from InOut import InOut
 class Nsga2Main(object):
     """Main Class"""
 
-    def __init__(self, projectFolder):
+    def __init__(self, projectFolder, inputName):
         #print "projectFolderNSGA2MAIN:" + projectFolder
-        selector= DbSelector(inputName=sys.argv[1])
+        selector= DbSelector(inputName)
         self.bd=json.loads(open(selector.select_db()).read())
-        dse_definitions = Definitions(projectFolder)
+        dse_definitions = Definitions(projectFolder, inputName)
         plotter = Plotter(dse_definitions)
         #problem = DS_DSE(dse_definitions)
         #print "dse_definitions:" + str(dse_definitions)
-        problem = DS_DSE(dse_definitions, projectFolder)
+        problem = DS_DSE(dse_definitions, projectFolder, inputName)
 #       evolution = Evolution(problem, 5000, 10, projectFolder)
-        evolution = Evolution(problem, 100, 10, projectFolder)
+        evolution = Evolution(problem, 100, 10, projectFolder, inputName)
         #evolution.register_on_new_generation(plotter.plot_population_best_front)
         evolution.register_on_new_generation(self.print_generation)
         #evolution.register_on_new_generation(print_metrics)
         #evolution.register_on_new_generation(collect_metrics)
         pareto_front = evolution.evolve()
         #output= InOut()
-        output = InOut(projectFolder)
+        output = InOut(projectFolder, inputName)
         preditor = output.performancePreditor()
         output.printResults(pareto_front,preditor )
         #plotter.plot_x_y(collected_metrics.keys(), map(lambda (hv, hvr): hvr, collected_metrics.values()), 'generation', 'HVR', 'HVR metric for ZDT3 problem', 'hvr-zdt3')
