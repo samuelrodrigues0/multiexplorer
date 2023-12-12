@@ -38,15 +38,16 @@ class GPGPU(SimulationTool.SimulationTool):
         self.appConfig = os.path.join(dir_path+"/"+ "appconfig.json")
         self.config = json.load(open(self.jsonFile))
         self.app = app
-        #self.geral = self.config['General_Modeling']
-        self.geral = input.get_dict()
+        self.geral = self.config['General_Modeling']
+        #self.geral = input.get_dict()
+        self.frominput = input.get_dict()
         self.outFile= self.createInputFolder(self.geral)
         #self.foldername = self.geral['model_name'] + '_' + self.app
-        self.foldername = PredictedModels.get_model(self.geral['model_name']) + '_' + self.app
+        self.foldername = PredictedModels.get_model(self.frominput['model_name']) + '_' + self.app
        
         try: 
             gpuConfigFolders= [f for f in os.listdir(CONFIGPATH)]
-            self.gpuInputFolder = [x for x in gpuConfigFolders if x.endswith(PredictedModels.get_model(self.geral['model_name']))][0]
+            self.gpuInputFolder = [x for x in gpuConfigFolders if x.endswith(PredictedModels.get_model(self.frominput['model_name']))][0]
         except:
             raise Exception("Model name not found ()")
 
@@ -73,7 +74,7 @@ class GPGPU(SimulationTool.SimulationTool):
             elif param =="power_simulation_enabled" and line.startswith("-"+param):
                 line = aux[0]+ " "+ str(inputValue)+"\n"
                 if self.geral[paramDict["power_simulation_enabled"]]:
-                    line = line+ "-gpuwattch_xml_file gpuwattch_"+str(PredictedModels.get_model(self.geral['model_name'])).lower()+".xml\n"
+                    line = line+ "-gpuwattch_xml_file gpuwattch_"+str(PredictedModels.get_model(self.frominput['model_name'])).lower()+".xml\n"
             elif line.startswith("-"+param):
                 line = aux[0]+ " "+ str(inputValue)+"\n"
         return line 
@@ -156,7 +157,7 @@ class GPGPU(SimulationTool.SimulationTool):
 
     def xmlParser(self):
         if self.geral["gpuwattch"]:
-            dstFile =os.path.join(SIM_OUT+"/"+ self.outFile+"/gpuwattch_"+str(PredictedModels.get_model(self.geral['model_name'])).lower()+".xml")
+            dstFile =os.path.join(SIM_OUT+"/"+ self.outFile+"/gpuwattch_"+str(PredictedModels.get_model(self.frominput['model_name'])).lower()+".xml")
             #print(dstFile)
             origFile=os.path.join(dir_path+"/gpuwattch.xml")
 
@@ -169,8 +170,8 @@ class GPGPU(SimulationTool.SimulationTool):
                 elif paramAttrib["name"] == "target_core_clockrate" or paramAttrib["name"] == "clock_rate" :
                     paramAttrib["value"]= str(self.geral["clock_rate"])
                 elif paramAttrib["name"] == "core_tech_node" or paramAttrib["name"] == "mem_tech_node" : 
-                    #paramAttrib["value"]= str(self.geral["power"]["technology_node"])
-                    paramAttrib["value"]= str(self.geral["technology_node"])
+                    paramAttrib["value"]= str(self.geral["power"]["technology_node"])
+                    #paramAttrib["value"]= str(self.geral["technology_node"])
             mytree.write(dstFile)
                 
 

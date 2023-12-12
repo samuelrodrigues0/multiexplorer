@@ -60,101 +60,100 @@ class GPGPUSimulatorAdapter(Adapter):
                                 "is_user_input" : True,
                                 "required" : True,
                                 "allowed_values" : Applications.get_dict()
-                    }),
-                        ]
-
-                    }),
-                    InputGroup({
-                        'label': "General_modeling",
-                        'key': 'general_modeling',
-                        "inputs": [
-                            Input({
-                                "label" : "Clock Rate",
-                                "key" : "clock_rate",
-                                'type': InputType.Integer,
-                                "is_user_input": True,
-                                "required": True,
-                                "default_value":1
-                            }),
-                            Input({
-                                "label" : "n_SM",
-                                "key" : "n_SM",
-                                'type': InputType.Integer,
-                                "is_user_input": True,
-                                "required": True,
-                                "default_value":1
-                            }),
-                            Input({
-                                "label" : "Shmem Size",
-                                "key" : "shmem_size",
-                                'type': InputType.Integer,
-                                "is_user_input": True,
-                                "required": True,
-                                "default_value":1
-                            }),
-                            Input({
-                                "label" : "Registers",
-                                "key" : "registers",
-                                'type': InputType.Integer,
-                                "is_user_input": True,
-                                "required": True,
-                                "default_value":1
-                            }),
-                            Input({
-                                "label" : "Blocks/SM",
-                                "key" : "blocks/SM",
-                                'type': InputType.Integer,
-                                "is_user_input": True,
-                                "required": True,
-                                "default_value":1
-                            }),
-                            Input({
-                                "label" : "Threads/SM",
-                                "key" : "threads/SM",
-                                'type': InputType.Integer,
-                                "is_user_input": True,
-                                "required": True,
-                                "default_value":1
-                            }),
-                            Input({
-                                "label" : "GpuWattch",
-                                "key" : "gpuwattch",
-                                'type': InputType.Checkbutton,
-                                "is_user_input": True,
-                                "required": True,
-                                "value":True
-                            })
-                        ]
-                    }),
-                    InputGroup({
-                        'label': "Power",
-                        'key': 'power',
-                        "inputs": [
-                            Input({
-                                "label" : "Vdd",
-                                "key" : "vdd",
-                                'type': InputType.Float,
-                                "is_user_input": True,
-                                "required": True,
-                                "default_value":1
-                            }),
-                            Input({
-                                "label" : "Technology Node",
-                                "key" : "technology_node",
-                                "is_user_input": False,
-                                "required": False,
-                                "allowed_values" : Technology_configs.get_dict()
-                            }),
-                            Input({
-                                "label" : "Temperature",
-                                "key" : "temperature",
-                                'type': InputType.Float,
-                                "is_user_input": True,
-                                "required": True,
-                                "default_value":1
                             }),
                         ]
-                    })
+                    }),
+                    #InputGroup({
+                    #    'label': "General_modeling",
+                    #    'key': 'general_modeling',
+                    #    "inputs": [
+                    #        Input({
+                    #            "label" : "Clock Rate",
+                    #            "key" : "clock_rate",
+                    #            'type': InputType.Integer,
+                    #            "is_user_input": False,
+                    #            "required": False,
+                    #            
+                    #        }),
+                    #        Input({
+                    #            "label" : "n_SM",
+                    #            "key" : "n_SM",
+                    #            'type': InputType.Integer,
+                    #            "is_user_input": False,
+                    #            "required": False,
+                    #            
+                    #        }),
+                    #        Input({
+                    #            "label" : "Shmem Size",
+                    #            "key" : "shmem_size",
+                    #            'type': InputType.Integer,
+                    #            "is_user_input": False,
+                    #            "required": False,
+                    #            
+                    #        }),
+                    #        Input({
+                    #            "label" : "Registers",
+                    #            "key" : "registers",
+                    #            'type': InputType.Integer,
+                    #            "is_user_input": False,
+                    #            "required": False,
+                    #            
+                    #        }),
+                    #        Input({
+                    #            "label" : "Blocks/SM",
+                    #            "key" : "blocks/SM",
+                    #            'type': InputType.Integer,
+                    #            "is_user_input": False,
+                    #            "required": False,
+                    #            
+                    #        }),
+                    #        Input({
+                    #            "label" : "Threads/SM",
+                    #            "key" : "threads/SM",
+                    #            'type': InputType.Integer,
+                    #            "is_user_input": False,
+                    #            "required": False,
+                    #            
+                    #        }),
+                    #        Input({
+                    #            "label" : "GpuWattch",
+                    #            "key" : "gpuwattch",
+                    #            'type': InputType.Checkbutton,
+                    #            "is_user_input": False,
+                    #            "required": False,
+                    #            "value":True
+                    #        })
+                    #    ]
+                    #}),
+                    #InputGroup({
+                    #    'label': "Power",
+                    #    'key': 'power',
+                    #    "inputs": [
+                    #        Input({
+                    #            "label" : "Vdd",
+                    #            "key" : "vdd",
+                    #            'type': InputType.Float,
+                    #            "is_user_input": False,
+                    #            "required": False,
+                    #            
+                    #        }),
+                    #        Input({
+                    #            "label" : "Technology Node",
+                    #            "key" : "technology_node",
+                    #            "is_user_input": False,
+                    #            "required": False,
+                    #            "allowed_values" : Technology_configs.get_dict()
+                    #        }),
+                    #        Input({
+                    #            "label" : "Temperature",
+                    #            "key" : "temperature",
+                    #            'type': InputType.Float,
+                    #            "is_user_input": False,
+                    #            "required": False,
+                    #            
+                    #        }),
+                    #    ]
+                    #})
                 ]
             })
         ])
@@ -232,19 +231,19 @@ class GPGPUSimulatorAdapter(Adapter):
             
         json_data['Preferences']['application'] = Applications.get_model(gui_data['app'])
         json_data['Preferences']['project_name'] = PredictedModels.get_model(gui_data['model_name']) + '_' + Applications.get_model(gui_data['app'])
-        json_data['General_Modeling']['clock_rate'] = gui_data['clock_rate']
-        json_data['General_Modeling']['n_SM'] = gui_data['n_SM']
-        json_data['General_Modeling']['shmem_size'] = gui_data['shmem_size']
-        json_data['General_Modeling']['registers'] = gui_data['registers']
-        json_data['General_Modeling']['blocks/SM'] = gui_data['blocks/SM']
-        json_data['General_Modeling']['threads/SM'] = gui_data['threads/SM']
-        if gui_data['gpuwattch']:
-            json_data['General_Modeling']['gpuwattch'] = 1
-        else:
-            json_data['General_Modeling']['gpuwattch'] = 0     
-        json_data['General_Modeling']['power']['vdd'] = str(gui_data['vdd'])
-        #json_data['General_Modeling']['power']['technology_node'] = Technology_configs.get_model(gui_data['technology_node'])
-        json_data['General_Modeling']['power']['temperature'] = str(gui_data['temperature'])
+        #json_data['General_Modeling']['clock_rate'] = gui_data['clock_rate']
+        #json_data['General_Modeling']['n_SM'] = gui_data['n_SM']
+        #json_data['General_Modeling']['shmem_size'] = gui_data['shmem_size']
+        #json_data['General_Modeling']['registers'] = gui_data['registers']
+        #json_data['General_Modeling']['blocks/SM'] = gui_data['blocks/SM']
+        #json_data['General_Modeling']['threads/SM'] = gui_data['threads/SM']
+        #if gui_data['gpuwattch']:
+        #    json_data['General_Modeling']['gpuwattch'] = 1
+        #else:
+        #    json_data['General_Modeling']['gpuwattch'] = 0     
+        #json_data['General_Modeling']['power']['vdd'] = str(gui_data['vdd'])
+        ##json_data['General_Modeling']['power']['technology_node'] = Technology_configs.get_model(gui_data['technology_node'])
+        #json_data['General_Modeling']['power']['temperature'] = str(gui_data['temperature'])
 
         with open(json_path, 'w') as data_file:
             json.dump(json_data, data_file, indent=2)
@@ -392,6 +391,7 @@ class DSEAdapter(Adapter):
         self.prepare()
 
         mod_json_path = self.change_json_in_project_folder()
+        #mod_json_path = self.inJson
         
         if self.inputs['settings']['dse_settings']['run_brute_force']:
             self.dseBruteForce(mod_json_path)
