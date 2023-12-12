@@ -20,7 +20,7 @@ class NSGA2Utils(object):
         self.number_of_genes_to_mutate = num_of_genes_to_mutate
         self.num_of_tour_particips = num_of_tour_particips
 
-        self.bd= json.loads(open(DbSelector(inputName=sys.argv[1]).select_db()).read())
+        self.bd= json.loads(open(DbSelector(inputName).select_db()).read())
         inputNsga= InOut(projectFolder, inputName)
         self.dict_entry= inputNsga.makeInputDict()
 

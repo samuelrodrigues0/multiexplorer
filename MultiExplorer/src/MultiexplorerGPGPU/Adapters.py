@@ -246,7 +246,7 @@ class GPGPUSimulatorAdapter(Adapter):
         #json_data['General_Modeling']['power']['temperature'] = str(gui_data['temperature'])
 
         with open(json_path, 'w') as data_file:
-            json.dump(json_data, data_file, indent=2)
+            json.dump(json_data, data_file, sort_keys=True, indent=4)
 
 
 class DSEAdapter(Adapter):
@@ -434,7 +434,7 @@ class DSEAdapter(Adapter):
         json_data['DSE']['Constraints']['application'] = Db_app.get_model(gui_data['db_app'])
 
         with open(json_path, 'w') as data_file:
-            json.dump(json_data, data_file, indent=2)
+            json.dump(json_data, data_file, sort_keys=True, indent=4)
 
         return json_path
 
@@ -442,7 +442,7 @@ class DSEAdapter(Adapter):
     def dse(self, json_project_folder):
     
         start = time.time()
-        Nsga2Main(projectFolder, inputName=json_project_folder)
+        Nsga2Main(projectFolder, json_project_folder, self.inputs['settings'])
         print("DSE NSGA2: OK") 
         end = time.time()
         print("The time of execution of NSGA program is :", end-start)
