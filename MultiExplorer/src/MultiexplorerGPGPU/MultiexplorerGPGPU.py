@@ -5,6 +5,7 @@ from MultiExplorer.src.Infrastructure.Events import Event
 from MultiExplorer.src.Infrastructure.ExecutionFlow import ExecutionFlow
 from Steps import GPGPUSimulationStep, DSEStep
 from MultiExplorer.src.config import PATH_RUNDIR
+from Presenters import BruteForcePresenter, NSGAPresenter
 
 class MultiexplorerGPGPUExecutionFlow(ExecutionFlow):
     
@@ -52,6 +53,19 @@ class MultiexplorerGPGPUExecutionFlow(ExecutionFlow):
     def execute(self):
         self.setup_dirs()
         ExecutionFlow.execute(self)
+
+
+    def get_results(self):
+        return {
+            "dsdse": self.steps[1].get_results(),
+        }
+    
+
+    def get_presenters(self):
+        return [
+            #BruteForcePresenter(),
+            NSGAPresenter(),
+        ]
 
     def handle_step_failure(self, step):
         tkMessageBox.showerror(

@@ -259,13 +259,13 @@ class DSEAdapter(Adapter):
                 'label': None,
                 'key': 'settings',
                 "inputs": [
-                    Input({
-                        'label': 'Db Experiment Application',
-                        'key': 'db_app',
-                        "is_user_input": True,
-                        "required": True,
-                        "allowed_values" : Db_app.get_dict()
-                    }),
+                    #Input({
+                    #    'label': 'Db Experiment Application',
+                    #    'key': 'db_app',
+                    #    "is_user_input": False,
+                    #    "required": False,
+                    #    "allowed_values" : Db_app.get_dict()
+                    #}),
                     InputGroup({
                         'label': "DSE Settings",
                         'key': 'dse_settings',
@@ -379,10 +379,12 @@ class DSEAdapter(Adapter):
             })
         ])
 
-        self.dse_engine = None
 
         self.inFile = None
+        
         self.inJson = None
+
+        self.presentable_results = None
 
 
     def execute(self):
@@ -397,6 +399,8 @@ class DSEAdapter(Adapter):
             self.dseBruteForce(mod_json_path)
 
         self.dse(mod_json_path)
+
+        self.register_results()
 
         print('\n'*3)
 
@@ -431,7 +435,9 @@ class DSEAdapter(Adapter):
         json_data['DSE']['ExplorationSpace']['original_cores_for_design'][1] = gui_data['original_cores_for_design'][1]
         json_data['DSE']['Constraints']['maximum_powerDensity'] = gui_data['maximum_power_density']
         json_data['DSE']['Constraints']['maximum_area'] = gui_data['maximum_area']
-        json_data['DSE']['Constraints']['application'] = Db_app.get_model(gui_data['db_app'])
+        json_data['DSE']['Constraints']['application'] = json_data['Preferences']['application']
+        #json_data['DSE']['Constraints']['application'] = Db_app.get_model(gui_data['db_app'])
+
 
         with open(json_path, 'w') as data_file:
             json.dump(json_data, data_file, sort_keys=True, indent=4)
@@ -458,3 +464,52 @@ class DSEAdapter(Adapter):
         print("DSE Brute Force: OK")
         print("The time of execution of BF program is :", end-start)
 
+
+    def register_results(self):
+        results = {}
+
+        try:
+            population_results = json.load(open(projectFolder + "/populationResults.json"))
+            results['population_results'] = population_results
+        except IOError:
+            results['population_results'] = None
+
+        try: # nao ajustado !!!
+            #dse_settings = json.load(open(self.get_output_path() + "/dse_settings.json"))
+            #orig_core = dse_settings['processor'] + '_' + dse_settings['technology']
+            orig_core = self.inJson["General_Modeling"]["model_name"] + '_' + self.inJson["General_Modeling"]["power"]["technology_node"]
+        except IOError:
+            orig_core = None
+
+        self.results = results
+
+        self.presentable_results = {
+            #'profile': self.profile,
+            'solutions': {},
+        }
+
+
+        for s in results['population_results']:
+            solution = results['population_results'][s]
+            
+            title = (
+                str(solution['amount_original_cores'])
+                + "x " + orig_core
+                + " & " + str(solution['amount_ip_cores'])
+                + "x " + solution['core_ip']['id']
+            )
+            self.presentable_results['solutions'][title] = {
+                'title': title,
+                'nbr_ip_cores': solution['amount_ip_cores'],
+                'nbr_orig_cores': solution['amount_original_cores'],
+                'ip_core': solution['core_ip']['id'],
+                'orig_core': orig_core,
+                'total_nbr_cores': solution['amount_ip_cores'] + solution['amount_original_cores'],
+                'total_area': solution['Results']['total_area'],
+                'performance': abs(float(solution['Results']['performance_pred'])),
+                'power_density': solution['Results']['total_power_density']
+            }
+
+
+    def get_results(self):
+        return self.presentable_results
