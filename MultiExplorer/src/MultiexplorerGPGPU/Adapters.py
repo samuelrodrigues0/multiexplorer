@@ -322,7 +322,7 @@ class DSEAdapter(Adapter):
                                 'type': InputType.Float,
                                 "is_user_input": True,
                                 "required": True,
-                                "default_value":1
+                                "default_value":0.3
                             }),
                             Input({
                                 'label': 'Maximum Area',
@@ -331,7 +331,7 @@ class DSEAdapter(Adapter):
                                 'type': InputType.Float,
                                 "is_user_input": True,
                                 "required": True,
-                                "default_value":1
+                                "default_value":200
                             }),
                         ],
                     }),
@@ -355,7 +355,8 @@ class DSEAdapter(Adapter):
                                 'type': InputType.Float,
                                 "is_user_input": True,
                                 "required": True,
-                                "default_value": 10.0,
+                                "default_value": 99.0,
+                                #"default_value": 10.0,
                             }),
                             Input({
                                 'label': 'Population Size',
@@ -364,6 +365,7 @@ class DSEAdapter(Adapter):
                                 "is_user_input": True,
                                 "required": True,
                                 "default_value": 10
+                                #"default_value": 10
                             }),
                             Input({
                                 'label': 'Number of Generations',
@@ -371,7 +373,8 @@ class DSEAdapter(Adapter):
                                 'type': InputType.Integer,
                                 "is_user_input": True,
                                 "required": True,
-                                "default_value": 150
+                                "default_value": 2
+                                #"default_value": 150
                             }),
                         ],
                     })
@@ -531,7 +534,6 @@ class DSEAdapter(Adapter):
             return
 
         self.presentable_results['brute_force_solutions'] = {}
-        print(self.brute_force.final_solution)
         for solution in self.brute_force.final_solution:
             title = (
                 str(solution['amount_orig_core'])
