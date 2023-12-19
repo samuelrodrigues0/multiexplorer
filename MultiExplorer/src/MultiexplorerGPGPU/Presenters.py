@@ -128,6 +128,7 @@ class NSGAPresenter(PlotbookPresenter):
                 + " distinct points."
         )
 
+
     def present_partials(self, frame, step_results, options=None):
         raise NotImplementedError
 
@@ -238,49 +239,5 @@ class NSGAPresenter(PlotbookPresenter):
             left=0.35,
             right=0.95
         )
-
-        return fig
-
-    @staticmethod
-    def plot_pareto_front(population_results):#, original_performance, original_power_density):
-        # type: (Dict, Tuple, Tuple) -> Figure
-        points = NSGAPresenter.get_pd_performance_points(population_results)
-
-        nbr_of_solutions = len(points)
-
-        points = sorted(points, key=lambda p: p[0])
-
-        power_density_values, performance_values, titles = zip(*points)
-
-        fig = Figure(figsize=NSGAPresenter.figsize, dpi=NSGAPresenter.dpi)
-
-        ax = fig.add_subplot(111)
-
-        x, y = np.array(power_density_values), np.array(performance_values)
-
-        ax.scatter(x, y, color=NSGAPresenter.perf_color)
-
-        #original_x = round(original_power_density[0], 2)
-
-        #original_y = round(original_performance[0], 2)
-
-        ax.scatter([original_x], [original_y], color=NSGAPresenter.density_color)
-
-        ax.annotate('Original', (original_x + .002, original_y))
-
-        if nbr_of_solutions > 1:
-            cubic_interploation_model = interp1d(x, y, kind="cubic")
-
-            splined_x = np.linspace(x.min(), x.max(), 2 * nbr_of_solutions)
-
-            splined_y = cubic_interploation_model(splined_x)
-
-            ax.plot(splined_x, splined_y, color=NSGAPresenter.perf_color)
-
-        ax.set_title("Aproximated Pareto Front")
-
-        ax.set_xlabel("Power Density (W/mm^2)")
-
-        ax.set_ylabel("Performance (1/s)")
 
         return fig

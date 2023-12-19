@@ -379,12 +379,15 @@ class DSEAdapter(Adapter):
             })
         ])
 
-
         self.inFile = None
         
         self.inJson = None
 
         self.presentable_results = None
+
+        self.brute_force = None
+
+        self.original_core = None
 
 
     def execute(self):
@@ -395,12 +398,19 @@ class DSEAdapter(Adapter):
         mod_json_path = self.change_json_in_project_folder()
         #mod_json_path = self.inJson
         
+        
         if self.inputs['settings']['dse_settings']['run_brute_force']:
             self.dseBruteForce(mod_json_path)
 
         self.dse(mod_json_path)
-
+        
         self.register_results()
+
+        if self.inputs['settings']['dse_settings']['run_brute_force']: # arrumar depois
+            self.register_brute_force_results()
+
+
+        #print(self.presentable_results)
 
         print('\n'*3)
 
@@ -459,7 +469,7 @@ class DSEAdapter(Adapter):
 
         neg_mean_absolute_percentage_scorer = metrics.make_scorer(mean_absolute_percentage_error, greater_is_better=False)
         start = time.time()
-        DsDseBruteForce(projectFolder, pathCSV=json_project_folder)
+        self.brute_force = DsDseBruteForce(projectFolder, pathCSV=json_project_folder)
         end = time.time()
         print("DSE Brute Force: OK")
         print("The time of execution of BF program is :", end-start)
@@ -478,6 +488,7 @@ class DSEAdapter(Adapter):
             #dse_settings = json.load(open(self.get_output_path() + "/dse_settings.json"))
             #orig_core = dse_settings['processor'] + '_' + dse_settings['technology']
             orig_core = self.inJson["General_Modeling"]["model_name"] + '_' + self.inJson["General_Modeling"]["power"]["technology_node"]
+            self.original_core = orig_core
         except IOError:
             orig_core = None
 
@@ -513,3 +524,29 @@ class DSEAdapter(Adapter):
 
     def get_results(self):
         return self.presentable_results
+    
+
+    def register_brute_force_results(self):
+        if not self.brute_force:
+            return
+
+        self.presentable_results['brute_force_solutions'] = {}
+        print(self.brute_force.final_solution)
+        for solution in self.brute_force.final_solution:
+            title = (
+                str(solution['amount_orig_core'])
+                + "x " + self.original_core
+                + " & " + str(solution['amount_ip_core'])
+                + "x " + solution['ip_core']['id']
+            )
+            self.presentable_results['brute_force_solutions'][title] = {
+                'title': title,
+                'nbr_ip_cores': solution["amount_ip_core"],
+                'nbr_orig_cores': solution["amount_orig_core"],
+                'ip_core': solution["ip_core"]["id"],
+                'orig_core': self.original_core,
+                'total_nbr_cores': solution["amount_ip_core"] + solution["amount_orig_core"],
+                'total_area': round(float(solution["area"]), 2),
+                'performance': round(float(solution["performancePred"]), 2),
+                'power_density': round(float(solution["powerDensity"]), 2)
+            }

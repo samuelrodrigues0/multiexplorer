@@ -257,22 +257,17 @@ class InOut(object):
             print "-> default DSE input"
             parameters = {}
             restriction = {}
-
             mcpat = self.readInputFromMcpat()
             performanceSim = self.readInputFromPerformanceSim()
-
             parameters["amount_original_cores"] = [1 , mcpat["amount_original_cores"]]
             parameters["area_orig"] = [mcpat["area_orig"], mcpat["area_orig"]]
             parameters["power_orig"] = [mcpat["power_orig"], mcpat["power_orig"]]
             parameters["performance_orig"] = [performanceSim["performance_orig"], performanceSim["performance_orig"]]
             parameters["amount_ip_cores"] = [int(mcpat["amount_original_cores"])/2, int(mcpat["amount_original_cores"])*2]
-            
             restriction["total_area"] = float(mcpat["area_orig"])*float(mcpat["amount_original_cores"])
             restriction["power_density"] = float(mcpat["power_orig"])/float(mcpat["area_orig"])  #para o força bruta
-
             self.inputDict["parameters"] = parameters
             self.inputDict["restrictions"] = restriction
-
             return self.inputDict
 
         def setInputDict(descriptionInput):
@@ -305,7 +300,6 @@ class InOut(object):
 
             return self.inputDict
 
-
         descriptionInput = json.loads(open(self.inputName).read())
         #verificar se tem chave DSE, caso tenha, criar dicionário com o que o usuário passou no arquivo de entrada
         if descriptionInput.has_key("DSE"):
@@ -313,6 +307,7 @@ class InOut(object):
         #caso contrário, criar deicionário com os valores defaults(valores defaults são valores baseados apenas nas saídas de simulação de desempenho e física)
         else:
             return setDefault()
+        
 
 if __name__ == "__main__":
     

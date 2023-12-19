@@ -12,7 +12,6 @@ class DsDseBruteForce(object):
     """Main Class"""
 
     def __init__(self, projectFolder, pathCSV):
-        
         path_db=DbSelector(inputName=pathCSV).select_db()
         self.inputDict= InOut(projectFolder, inputName=pathCSV).makeInputDict()
         self.preditor= InOut(projectFolder, inputName=pathCSV).performancePreditor()
@@ -67,21 +66,28 @@ class DsDseBruteForce(object):
                         amount_ip_core,
                         amount_orig_core
                         )
+                    
                     _dict={"amount_orig_core":amount_orig_core, "amount_ip_core":amount_ip_core, "ip_core":ip_core,"powerDensity":str(round(float(parameters[0]), 3)),"area":parameters[1], "performance":parameters[2], "performancePred":performancePred} 
                     self.first_solution.append(_dict)    
                     if is_viable(parameters):
                         self.final_solution.append(_dict)
 
     def calculateParameters(self, amount_original, amount_ip, ip_core):
-        origPower = self.inputDict["parameters"]["power_orig"][1]
-        origArea = self.inputDict["parameters"]["area_orig"][1]
-        origPerf = self.inputDict["parameters"]["performance_orig"][1]
+        orig_power = float(self.inputDict["parameters"]["power_orig"][1])
 
-        powerDensity= float(amount_original*origPower+amount_ip*ip_core["pow"])/float(amount_original*origArea+amount_ip*ip_core["area"])
-        totalArea=(amount_original*origArea+amount_ip*ip_core["area"])
-        totalPeformance= (amount_original*origPerf+amount_ip*ip_core["perf"])
+        orig_area = float(self.inputDict["parameters"]["area_orig"][1])
 
-        return (powerDensity, totalArea, totalPeformance)
+        orig_perf = float(self.inputDict["parameters"]["performance_orig"][1])
+
+        total_power = float(amount_original * orig_power + amount_ip * ip_core["pow"])
+
+        total_area = float(amount_original * orig_area + amount_ip * ip_core["area"])
+
+        power_density = float(total_power) / float(total_area)
+
+        total_performance = float(amount_original * orig_perf + amount_ip * ip_core["perf"])
+
+        return power_density, total_area, total_performance
 
     def printCSV(self):
         csvFile= open(self.pathCSV, "w")

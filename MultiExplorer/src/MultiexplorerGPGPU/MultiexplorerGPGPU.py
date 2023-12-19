@@ -63,7 +63,7 @@ class MultiexplorerGPGPUExecutionFlow(ExecutionFlow):
 
     def get_presenters(self):
         return [
-            #BruteForcePresenter(),
+            BruteForcePresenter(),
             NSGAPresenter(),
         ]
 
