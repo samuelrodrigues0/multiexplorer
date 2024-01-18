@@ -6,6 +6,28 @@ from matplotlib.figure import Figure
 from scipy.interpolate import interp1d
 from MultiExplorer.src.GUI.Presenters import Presenter, PlotbookPresenter
 from MultiExplorer.src.GUI.Widgets import CanvasTable
+import copy
+
+brute_force_values = {}
+
+class GPGPUSimPresenter(Presenter):
+    def __init__(self):
+        super(GPGPUSimPresenter, self).__init__()
+
+        self.table = None
+
+        self.canvas_frame = None
+
+    def present_results(self, frame, results, options=None):
+        # todo
+        return 0
+
+    def present_partials(self, frame, step_results, options=None):
+        raise NotImplementedError
+
+    def get_info(self, step_results, options=None):
+        return "Performance: " + str(step_results['performance'][0]) + " " + str(step_results['performance'][1])
+
 
 class BruteForceTablePresenter(Presenter):
 
@@ -48,8 +70,9 @@ class BruteForceTablePresenter(Presenter):
         self.canvas = Tkinter.Canvas(frame)
 
         solutions = results['dsdse']['brute_force_solutions']
+        solution_filtered, removed = self.remove_duplicate(solutions)
 
-        nbr_of_solutions = len(solutions)
+        nbr_of_solutions = len(solution_filtered)
 
         height = table_options['cell_height'] * (6 + nbr_of_solutions + 6)
 
@@ -73,7 +96,7 @@ class BruteForceTablePresenter(Presenter):
             ['Architecture', 'Performance', 'Area', 'Power Density'],
         ]
 
-        for s in solutions:
+        for s in solution_filtered:
             solutions_data.append([
                 s,
                 str(round(solutions[s]['performance'], 2)) + " s^-1",
@@ -81,12 +104,45 @@ class BruteForceTablePresenter(Presenter):
                 str(round(solutions[s]['power_density'], 2)) + " W/mm^2",
             ])
 
+        for i in removed:
+            del solutions[i]
+        
+        global brute_force_values
+
+        cnt = 0
+        for key, value in solutions.items():
+            brute_force_values[key] = copy.deepcopy(value)
+            cnt += 1
+            if cnt == 5:
+                break
+
+
         table_options['data'] = solutions_data
 
         self.sol_table = CanvasTable(self.canvas, table_options)
 
         return height
 
+    def remove_duplicate(self, solution):
+        
+        final_set = set()
+        final_list = []
+        removed_list = []
+
+        for key in solution:
+            current_set = frozenset(solution[key]['title'].split())
+            if current_set not in final_set:
+                final_set.add(current_set)
+                final_list.append(solution[key]['title'])
+            else:
+                removed_list.append(solution[key]['title'])
+
+
+        for i in removed_list:
+            print(i)
+
+        return final_list, removed_list
+    
 
 class NSGAPresenter(PlotbookPresenter):
     figsize = (12, 4)
@@ -103,23 +159,24 @@ class NSGAPresenter(PlotbookPresenter):
 
     perf_color = 'darkblue'
 
-    density_color = 'orange'
+    density_color = 'red'
 
     def get_figures(self, results):
 
         population_results = results['dsdse']['solutions']
 
-        #original_performance = results['performance_simulation']['performance']
+        original_performance = results['dsdse']['performance_simulation']['performance']
 
-        #original_power_density = results['physical_simulation']['power_density']
+        original_power_density = results['dsdse']['performance_simulation']['power_density']
 
         return {
             "NSGA-II Approximated Paretto Set": self.plot_population(
                 population_results,
-                #original_performance,
-                #original_power_density
+                original_performance,
+                original_power_density
             )
         }
+
 
     def get_info(self, step_results, options=None):
         return (
@@ -150,7 +207,7 @@ class NSGAPresenter(PlotbookPresenter):
         return points
 
     @staticmethod
-    def plot_population(population_results):#, original_performance, original_power_density):
+    def plot_population(population_results, original_performance, original_power_density):
         # type: (Dict, Tuple, Tuple) -> Figure
         points = NSGAPresenter.get_pd_performance_points(population_results)
 
@@ -205,34 +262,34 @@ class NSGAPresenter(PlotbookPresenter):
 
         ax.set_xlabel("Power Density (W/mm^2)", fontsize=NSGAPresenter.axis_font_size)
 
-        #ax2.axvline(x=original_performance[0], color=NSGAPresenter.perf_color)
+        ax2.axvline(x=original_performance[0], color=NSGAPresenter.perf_color)
 
-        #ax.axvline(x=original_power_density[0], color=NSGAPresenter.density_color)
+        ax.axvline(x=original_power_density[0], color=NSGAPresenter.density_color)
 
         ylim = ax2.get_ylim()
 
-        #ax2.text(
-        #    original_performance[0],
-        #    ylim[1] * .99,
-        #    '%.2f' % round(original_performance[0], 2),
-        #    ha='left',
-        #    va='top',
-        #    fontsize=NSGAPresenter.bar_text_font_size * 5 / 6,
-        #    color=NSGAPresenter.perf_color
-        #)
+        ax2.text(
+            original_performance[0],
+            ylim[1] * .99,
+            '%.2f' % round(original_performance[0], 2),
+            ha='left',
+            va='top',
+            fontsize=NSGAPresenter.bar_text_font_size * 5 / 6,
+            color=NSGAPresenter.perf_color
+        )
 
         xlim = ax.get_xlim()
-#
-        #ax.text(
-        #    original_power_density[0] + .001 * xlim[1],
-        #    ylim[0],
-        #    '%.2f' % round(original_power_density[0], 2),
-        #    ha='left',
-        #    va='bottom',
-        #    fontsize=NSGAPresenter.bar_text_font_size * 5 / 6,
-        #    color=NSGAPresenter.density_color
-        #)
-#
+
+        ax.text(
+            original_power_density[0] + .001 * xlim[1],
+            ylim[0],
+            '%.2f' % round(original_power_density[0], 2),
+            ha='left',
+            va='bottom',
+            fontsize=NSGAPresenter.bar_text_font_size * 5 / 6,
+            color=NSGAPresenter.density_color
+        )
+
         fig.subplots_adjust(
             top=0.8,
             bottom=0.2,
@@ -335,30 +392,26 @@ class BruteForcePresenter(PlotbookPresenter):
 
     perf_color = 'darkblue'
 
-    density_color = 'orange'
+    density_color = 'red'
 
     def get_figures(self, results):
 
-        population_results = results['dsdse']['brute_force_solutions']
+        #population_results = results['dsdse']['brute_force_solutions']
+        global brute_force_values
+        population_results = copy.deepcopy(brute_force_values)
+        brute_force_values.clear()
 
-        #original_performance = results['performance_simulation']['performance']
+        original_performance = results['dsdse']['performance_simulation']['performance']
 
-        #original_power_density = results['physical_simulation']['power_density']
+        original_power_density = results['dsdse']['performance_simulation']['power_density']
 
         return {
             "Brute Force Approximated Paretto Set": self.plot_population(
                 population_results,
-                #original_performance,
-                #original_power_density
+                original_performance,
+                original_power_density
             )
         }
-
-    def get_info(self, step_results, options=None):
-        return (
-                "NSGA-II generated a paretto frontier aproximation containing "
-                + str(len(step_results['solutions']))
-                + " distinct points."
-        )
 
 
     def present_partials(self, frame, step_results, options=None):
@@ -382,31 +435,31 @@ class BruteForcePresenter(PlotbookPresenter):
         return points
 
     @staticmethod
-    def plot_population(population_results):#, original_performance, original_power_density):
+    def plot_population(population_results, original_performance, original_power_density):
         # type: (Dict, Tuple, Tuple) -> Figure
-        points = NSGAPresenter.get_pd_performance_points(population_results)
+        points = BruteForcePresenter.get_pd_performance_points(population_results)
 
         power_density_values, performance_values, titles = zip(*points)
 
         nbr_of_solutions = len(titles)
 
         ind = np.arange(nbr_of_solutions)
-        height = NSGAPresenter.bar_height
+        height = BruteForcePresenter.bar_height
 
-        fig = Figure(figsize=NSGAPresenter.figsize, dpi=NSGAPresenter.dpi)
+        fig = Figure(figsize=BruteForcePresenter.figsize, dpi=BruteForcePresenter.dpi)
 
         ax = fig.add_subplot(111)
 
         ax.set_yticks(range(0, int(nbr_of_solutions) * 2, 2))
 
-        ax.set_yticklabels(titles, wrap=True, fontdict={'fontsize': NSGAPresenter.ticks_font_size,
+        ax.set_yticklabels(titles, wrap=True, fontdict={'fontsize': BruteForcePresenter.ticks_font_size,
                                                         'verticalalignment': 'center',
                                                         'horizontalalignment': 'right'})
 
         ax2 = ax.twiny()
 
         performance_bars = ax2.barh(ind * 2 + .5 * height, performance_values, height, align='center',
-                                    color=NSGAPresenter.perf_color)
+                                    color=BruteForcePresenter.perf_color)
 
         for bar in performance_bars:
             ax2.text(
@@ -415,12 +468,12 @@ class BruteForcePresenter(PlotbookPresenter):
                 '%.2f' % round(bar.get_width(), 2),
                 ha='left',
                 va='center',
-                fontsize=NSGAPresenter.bar_text_font_size,
-                color=NSGAPresenter.perf_color
+                fontsize=BruteForcePresenter.bar_text_font_size,
+                color=BruteForcePresenter.perf_color
             )
 
         power_density_bars = ax.barh(ind * 2 - .5 * height, power_density_values,
-                                     height=height, align='center', color=NSGAPresenter.density_color)
+                                     height=height, align='center', color=BruteForcePresenter.density_color)
 
         for bar in power_density_bars:
             ax.text(
@@ -429,42 +482,42 @@ class BruteForcePresenter(PlotbookPresenter):
                 '%.2f' % round(bar.get_width(), 2),
                 ha='left',
                 va='center',
-                fontsize=NSGAPresenter.bar_text_font_size,
-                color=NSGAPresenter.density_color
+                fontsize=BruteForcePresenter.bar_text_font_size,
+                color=BruteForcePresenter.density_color
             )
 
-        ax2.set_xlabel("Performance (1/s)", fontsize=NSGAPresenter.axis_font_size)
+        ax2.set_xlabel("Performance (1/s)", fontsize=BruteForcePresenter.axis_font_size)
 
-        ax.set_xlabel("Power Density (W/mm^2)", fontsize=NSGAPresenter.axis_font_size)
+        ax.set_xlabel("Power Density (W/mm^2)", fontsize=BruteForcePresenter.axis_font_size)
 
-        #ax2.axvline(x=original_performance[0], color=NSGAPresenter.perf_color)
+        ax2.axvline(x=original_performance[0], color=BruteForcePresenter.perf_color)
 
-        #ax.axvline(x=original_power_density[0], color=NSGAPresenter.density_color)
+        ax.axvline(x=original_power_density[0], color=BruteForcePresenter.density_color)
 
         ylim = ax2.get_ylim()
 
-        #ax2.text(
-        #    original_performance[0],
-        #    ylim[1] * .99,
-        #    '%.2f' % round(original_performance[0], 2),
-        #    ha='left',
-        #    va='top',
-        #    fontsize=NSGAPresenter.bar_text_font_size * 5 / 6,
-        #    color=NSGAPresenter.perf_color
-        #)
+        ax2.text(
+            original_performance[0],
+            ylim[1] * .99,
+            '%.2f' % round(original_performance[0], 2),
+            ha='left',
+            va='top',
+            fontsize=BruteForcePresenter.bar_text_font_size * 5 / 6,
+            color=BruteForcePresenter.perf_color
+        )
 
         xlim = ax.get_xlim()
-#
-        #ax.text(
-        #    original_power_density[0] + .001 * xlim[1],
-        #    ylim[0],
-        #    '%.2f' % round(original_power_density[0], 2),
-        #    ha='left',
-        #    va='bottom',
-        #    fontsize=NSGAPresenter.bar_text_font_size * 5 / 6,
-        #    color=NSGAPresenter.density_color
-        #)
-#
+
+        ax.text(
+            original_power_density[0] + .001 * xlim[1],
+            ylim[0],
+            '%.2f' % round(original_power_density[0], 2),
+            ha='left',
+            va='bottom',
+            fontsize=BruteForcePresenter.bar_text_font_size * 5 / 6,
+            color=BruteForcePresenter.density_color
+        )
+
         fig.subplots_adjust(
             top=0.8,
             bottom=0.2,
@@ -473,3 +526,7 @@ class BruteForcePresenter(PlotbookPresenter):
         )
 
         return fig
+
+
+    def get_info(self, step_results, options=None):
+        raise NotImplemented

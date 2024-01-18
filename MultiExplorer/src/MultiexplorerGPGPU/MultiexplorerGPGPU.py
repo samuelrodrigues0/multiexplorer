@@ -5,7 +5,7 @@ from MultiExplorer.src.Infrastructure.Events import Event
 from MultiExplorer.src.Infrastructure.ExecutionFlow import ExecutionFlow
 from Steps import GPGPUSimulationStep, DSEStep
 from MultiExplorer.src.config import PATH_RUNDIR
-from Presenters import BruteForceTablePresenter, NSGAPresenter, NSGATablePresenter, BruteForcePresenter
+from Presenters import BruteForceTablePresenter, NSGAPresenter, NSGATablePresenter, BruteForcePresenter, GPGPUSimPresenter
 
 class MultiexplorerGPGPUExecutionFlow(ExecutionFlow):
     
@@ -67,6 +67,7 @@ class MultiexplorerGPGPUExecutionFlow(ExecutionFlow):
             NSGAPresenter(),
             BruteForceTablePresenter(),
             BruteForcePresenter(),
+            GPGPUSimPresenter(),
         ]
 
     def handle_step_failure(self, step):

@@ -32,6 +32,7 @@ from GPGPU import GPGPU
 from DS_DSE.Nsga2Main import Nsga2Main
 from DsDseBruteForce import DsDseBruteForce
 
+projectFolder = None
 
 class GPGPUSimulatorAdapter(Adapter):
     
@@ -166,11 +167,13 @@ class GPGPUSimulatorAdapter(Adapter):
 
         self.dirListB4 = os.listdir(PATH_REPO)
         
+        self.presentable_results = None
+
         #self.folderOldSimul = None
     
 
     def execute(self):
-        print('\n'*3 + '-'*80 + 'Simulation' + '-'*80)
+        print('\n'*3 + '-'*20 + 'Simulation' + '-'*20)
         self.prepare()
         self.sim_execute()
         self.project_folder()
@@ -247,6 +250,11 @@ class GPGPUSimulatorAdapter(Adapter):
 
         with open(json_path, 'w') as data_file:
             json.dump(json_data, data_file, sort_keys=True, indent=4)
+
+
+    def get_results(self):
+        raise NotImplemented
+        return self.presentable_results
 
 
 class DSEAdapter(Adapter):
@@ -394,7 +402,7 @@ class DSEAdapter(Adapter):
 
 
     def execute(self):
-        print('-'*80 + 'DSE' + '-'*80)
+        print('-'*20 + 'DSE' + '-'*20)
 
         self.prepare()
 
@@ -413,7 +421,7 @@ class DSEAdapter(Adapter):
             self.register_brute_force_results()
 
 
-        #print(self.presentable_results)
+        print(self.presentable_results)
 
         print('\n'*3)
 
@@ -490,7 +498,7 @@ class DSEAdapter(Adapter):
         try: # nao ajustado !!!
             #dse_settings = json.load(open(self.get_output_path() + "/dse_settings.json"))
             #orig_core = dse_settings['processor'] + '_' + dse_settings['technology']
-            orig_core = self.inJson["General_Modeling"]["model_name"] + '_' + self.inJson["General_Modeling"]["power"]["technology_node"]
+            orig_core = self.inJson["General_Modeling"]["model_name"] + '_' + self.inJson["General_Modeling"]["power"]["technology_node"] + 'nm'
             self.original_core = orig_core
         except IOError:
             orig_core = None
@@ -500,6 +508,14 @@ class DSEAdapter(Adapter):
         self.presentable_results = {
             #'profile': self.profile,
             'solutions': {},
+            'performance_simulation' : {}
+        }
+
+        simulation_inputs = self.brute_force.inputDict['parameters']
+
+        self.presentable_results['performance_simulation'] = {
+            'performance': simulation_inputs['performance_orig'],
+            'power_density': simulation_inputs['power_orig']
         }
 
 

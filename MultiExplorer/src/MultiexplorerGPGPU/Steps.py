@@ -1,12 +1,12 @@
 from MultiExplorer.src.Infrastructure.Events import Event
 from MultiExplorer.src.Infrastructure.ExecutionFlow import Step
 from MultiExplorer.src.MultiexplorerGPGPU.Adapters import GPGPUSimulatorAdapter, DSEAdapter
-from MultiExplorer.src.CPUHeterogeneousMulticoreExploration.Presenters import NSGAPresenter
+from MultiExplorer.src.MultiexplorerGPGPU.Presenters import NSGAPresenter, GPGPUSimPresenter
 
 class GPGPUSimulationStep(Step):
     
     def get_results(self):
-        pass
+        return self.adapter.get_results()
 
     def __new__(cls):
         if not hasattr(cls, 'instance'):
@@ -52,7 +52,7 @@ class GPGPUSimulationStep(Step):
             self.fire(Event.STEP_EXECUTION_FAILED, self)
 
     def get_presenter(self):
-        pass
+        return GPGPUSimPresenter()
 
 
 class DSEStep(Step):
