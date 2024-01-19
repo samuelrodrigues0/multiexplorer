@@ -32,7 +32,9 @@ from GPGPU import GPGPU
 from DS_DSE.Nsga2Main import Nsga2Main
 from DsDseBruteForce import DsDseBruteForce
 
+
 projectFolder = None
+
 
 class GPGPUSimulatorAdapter(Adapter):
     
@@ -402,6 +404,7 @@ class DSEAdapter(Adapter):
 
 
     def execute(self):
+        
         print('-'*20 + 'DSE' + '-'*20)
 
         self.prepare()
@@ -420,8 +423,7 @@ class DSEAdapter(Adapter):
         if self.inputs['settings']['dse_settings']['run_brute_force']: # arrumar depois
             self.register_brute_force_results()
 
-
-        print(self.presentable_results)
+        #print(self.presentable_results)
 
         print('\n'*3)
 
@@ -487,6 +489,7 @@ class DSEAdapter(Adapter):
 
 
     def register_results(self):
+        
         results = {}
 
         try:
@@ -512,10 +515,15 @@ class DSEAdapter(Adapter):
         }
 
         simulation_inputs = self.brute_force.inputDict['parameters']
+        pd = float(simulation_inputs["power_orig"][0])/float(simulation_inputs["area_orig"][0])
+        
+        #print("aqui*******")
+        #print(simulation_inputs)
+
 
         self.presentable_results['performance_simulation'] = {
             'performance': simulation_inputs['performance_orig'],
-            'power_density': simulation_inputs['power_orig']
+            'power_density': [pd, pd]
         }
 
 
@@ -546,11 +554,17 @@ class DSEAdapter(Adapter):
     
 
     def register_brute_force_results(self):
+        
         if not self.brute_force:
             return
+        
+        solutions = self.brute_force.final_solution
+
+        if not solutions:
+            solutions = self.brute_force.first_solution
 
         self.presentable_results['brute_force_solutions'] = {}
-        for solution in self.brute_force.final_solution:
+        for solution in solutions:
             title = (
                 str(solution['amount_orig_core'])
                 + "x " + self.original_core

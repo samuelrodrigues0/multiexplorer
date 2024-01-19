@@ -42,7 +42,6 @@ class GPGPU(SimulationTool.SimulationTool):
         #self.geral = input.get_dict()
         self.frominput = input.get_dict()
         self.outFile= self.createInputFolder(self.geral)
-        print("DEBUG***********")
         print(self.outFile)
         #self.foldername = self.geral['model_name'] + '_' + self.app
         self.foldername = PredictedModels.get_model(self.frominput['model_name']) + '_' + self.app

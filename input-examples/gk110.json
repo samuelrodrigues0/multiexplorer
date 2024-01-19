@@ -2,13 +2,13 @@
 	"Preferences":
 	{
 		"sim_tool":"gpgpusim",
-		"project_name":"Gk110_clock_mlp",
+		"project_name":"GK110_clock_mlp",
 		"application":"clock",
 		"DSE":true
 	},
 	"General_Modeling":
 	{
-		"model_name":"Gk110",
+		"model_name":"GK110",
 		"clock_rate": 837,
 		"n_SM": 8,
 		"shmem_size":98304,

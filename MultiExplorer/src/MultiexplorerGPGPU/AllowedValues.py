@@ -6,6 +6,7 @@ from MultiExplorer.src.config import PATH_INPUTS
 
 
 class Simulators(Enum):
+    
     GPGPUSim = 1
 
     @staticmethod
@@ -20,8 +21,13 @@ class Simulators(Enum):
 
 
 class PredictedModels(Enum):
+    
     gtx480 = 1
     titanx = 2
+    gk110 = 3
+    qv100 = 4
+    rtx2060 = 5
+    titanv = 6
 
     @staticmethod
     def belongs(value):
@@ -29,49 +35,83 @@ class PredictedModels(Enum):
 
     @staticmethod
     def get_label(value):
+        
         if value == PredictedModels.gtx480:
             return "GTX_480"
-        if value == PredictedModels.titanx:
+        elif value == PredictedModels.titanx:
             return "Titan_X"
+        elif value == PredictedModels.gk110:
+            return "GK_110"
+        elif value == PredictedModels.qv100:
+            return "QV_100"
+        elif value == PredictedModels.rtx2060:
+            return "RTX_2060"
+        elif value == PredictedModels.titanv:
+            return "Titan_V"
 
         raise ValueError("Value does not corresponds to a known predicted core.")
 
     @staticmethod
     def get_dict():
+        
         return {
             PredictedModels.gtx480.value: PredictedModels.get_label(PredictedModels.gtx480),
-            PredictedModels.titanx.value: PredictedModels.get_label(PredictedModels.titanx)
+            PredictedModels.titanx.value: PredictedModels.get_label(PredictedModels.titanx),
+            #PredictedModels.gk110.value: PredictedModels.get_label(PredictedModels.gk110),
+            PredictedModels.qv100.value: PredictedModels.get_label(PredictedModels.qv100),
+            PredictedModels.rtx2060.value: PredictedModels.get_label(PredictedModels.rtx2060),
+            PredictedModels.titanv.value: PredictedModels.get_label(PredictedModels.titanv)
         }
     
     @staticmethod
     def get_model(value):
+        
         # type: (int) -> str
         if value == PredictedModels.gtx480.value:
             return "GTX480"
         elif value == PredictedModels.titanx.value:
             return "TITANX"
+        elif value == PredictedModels.gk110.value:
+            return "GK110"
+        elif value == PredictedModels.qv100.value:
+            return "QV100"
+        elif value == PredictedModels.rtx2060.value:
+            return "RTX2060"
+        elif value == PredictedModels.titanv.value:
+            return "TITANV"
 
         raise ValueError("Value does not corresponds to a known predicted core.")
     
     @staticmethod
     def get_json_path(value):
+        
         if value == PredictedModels.gtx480.value:
             return PATH_INPUTS + "/gtx480.json"
         elif value == PredictedModels.titanx.value:
             return PATH_INPUTS + "/titanx.json"
+        elif value == PredictedModels.gk110.value:
+            return PATH_INPUTS + "/gk110.json"
+        elif value == PredictedModels.qv100.value:
+            return PATH_INPUTS + "/qv100.json"
+        elif value == PredictedModels.rtx2060.value:
+            return PATH_INPUTS + "/rtx2060.json"
+        elif value == PredictedModels.titanv.value:
+            return PATH_INPUTS + "/titanv.json"
 
         raise ValueError("Can't find default input json file for unknown/unpredicted cores.")
     
     @staticmethod
-    def get_sim_tool(value):
-        
-        if value == PredictedModels.gtx480.value or value == PredictedModels.titanx.value:
-            return "gpgpusim"
+    def get_sim_tool(value):  
+        return "gpgpusim"
+
+        #if value == PredictedModels.gtx480.value or value == PredictedModels.titanx.value:
+        #    return "gpgpusim"
 
         #raise ValueError("Can't find default input json file for unknown/unpredicted cores.")
 
 
 class Applications(Enum):
+    
     asyncAPI = 1
     backprop = 2
     bfs = 3
@@ -88,6 +128,7 @@ class Applications(Enum):
 
     @staticmethod
     def get_label(value):
+        
         if value == Applications.asyncAPI:
             return "asyncAPI"
         if value == Applications.backprop:
@@ -111,6 +152,7 @@ class Applications(Enum):
 
     @staticmethod
     def get_dict():
+        
         return {
             Applications.asyncAPI.value: Applications.get_label(Applications.asyncAPI),
             #Applications.backprop.value: Applications.get_label(Applications.backprop),
@@ -125,6 +167,7 @@ class Applications(Enum):
     
     @staticmethod
     def get_model(value):
+        
         # type: (int) -> str
         if value == Applications.asyncAPI.value:
             return "asyncAPI"
@@ -149,6 +192,7 @@ class Applications(Enum):
 
 
 class Configs(Enum):
+    
     gpu_gpu = 1
     gpu_cpu = 2
 
@@ -158,6 +202,7 @@ class Configs(Enum):
 
     @staticmethod
     def get_label(value):
+        
         if value == Configs.gpu_gpu:
             return "gpu-gpu"
         if value == Configs.gpu_cpu:
@@ -167,6 +212,7 @@ class Configs(Enum):
 
     @staticmethod
     def get_dict():
+        
         return {
             Configs.gpu_gpu.value: Configs.get_label(Configs.gpu_gpu),
             Configs.gpu_cpu.value: Configs.get_label(Configs.gpu_cpu),
@@ -175,6 +221,7 @@ class Configs(Enum):
     
     @staticmethod
     def get_model(value):
+       
         # type: (int) -> str
         if value == Configs.gpu_gpu.value:
             return "gpu-gpu"
@@ -185,6 +232,7 @@ class Configs(Enum):
     
 
 class Technology_configs(Enum):
+    
     nm22 = 1
     nm32 = 2
     nm45 = 3
@@ -196,6 +244,7 @@ class Technology_configs(Enum):
 
     @staticmethod
     def get_label(value):
+        
         if value == Technology_configs.nm22:
             return "22nm"
         if value == Technology_configs.nm32:
@@ -209,6 +258,7 @@ class Technology_configs(Enum):
 
     @staticmethod
     def get_dict():
+        
         return {
             Technology_configs.nm22.value: Technology_configs.get_label(Technology_configs.nm22),
             Technology_configs.nm32.value: Technology_configs.get_label(Technology_configs.nm32),
@@ -219,6 +269,7 @@ class Technology_configs(Enum):
     
     @staticmethod
     def get_model(value):
+        
         # type: (int) -> str
         if value == Technology_configs.nm22.value:
             return "22"
@@ -233,6 +284,7 @@ class Technology_configs(Enum):
     
 
 class Db_app(Enum):
+    
     clock = 1
     asyncAPI = 2
     all = 3
@@ -243,6 +295,7 @@ class Db_app(Enum):
 
     @staticmethod
     def get_label(value):
+        
         if value == Db_app.clock:
             return "clock"
         if value == Db_app.asyncAPI:
@@ -254,6 +307,7 @@ class Db_app(Enum):
 
     @staticmethod
     def get_dict():
+        
         return {
             Db_app.clock.value: Db_app.get_label(Db_app.clock),
             Db_app.asyncAPI.value: Db_app.get_label(Db_app.asyncAPI),
@@ -263,6 +317,7 @@ class Db_app(Enum):
     
     @staticmethod
     def get_model(value):
+        
         # type: (int) -> str
         if value == Db_app.clock.value:
             return "clock"

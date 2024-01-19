@@ -11,6 +11,7 @@ import copy
 brute_force_values = {}
 
 class GPGPUSimPresenter(Presenter):
+    
     def __init__(self):
         super(GPGPUSimPresenter, self).__init__()
 
@@ -18,12 +19,15 @@ class GPGPUSimPresenter(Presenter):
 
         self.canvas_frame = None
 
+
     def present_results(self, frame, results, options=None):
         # todo
         return 0
 
+
     def present_partials(self, frame, step_results, options=None):
         raise NotImplementedError
+
 
     def get_info(self, step_results, options=None):
         return "Performance: " + str(step_results['performance'][0]) + " " + str(step_results['performance'][1])
@@ -32,6 +36,7 @@ class GPGPUSimPresenter(Presenter):
 class BruteForceTablePresenter(Presenter):
 
     def get_info(self, step_results, options=None):
+        
         if 'brute_force_solutions' not in step_results:
             return ""
 
@@ -41,17 +46,22 @@ class BruteForceTablePresenter(Presenter):
                 + " viable solutions."
         )
 
+
     def __init__(self):
+        
         super(BruteForceTablePresenter, self).__init__()
 
         self.canvas = None
 
         self.sol_table = None
 
+
     def present_partials(self, frame, step_results, options=None):
         raise NotImplementedError
 
+
     def present_results(self, frame, results, options=None):
+        
         if 'brute_force_solutions' not in results['dsdse']:
             return 0
 
@@ -70,9 +80,10 @@ class BruteForceTablePresenter(Presenter):
         self.canvas = Tkinter.Canvas(frame)
 
         solutions = results['dsdse']['brute_force_solutions']
-        solution_filtered, removed = self.remove_duplicate(solutions)
 
-        nbr_of_solutions = len(solution_filtered)
+        solutions_filtered = self.get_bf_filtered_results(solutions)
+
+        nbr_of_solutions = len(solutions_filtered)
 
         height = table_options['cell_height'] * (6 + nbr_of_solutions + 6)
 
@@ -96,7 +107,8 @@ class BruteForceTablePresenter(Presenter):
             ['Architecture', 'Performance', 'Area', 'Power Density'],
         ]
 
-        for s in solution_filtered:
+        
+        for s in solutions_filtered:
             solutions_data.append([
                 s,
                 str(round(solutions[s]['performance'], 2)) + " s^-1",
@@ -104,47 +116,59 @@ class BruteForceTablePresenter(Presenter):
                 str(round(solutions[s]['power_density'], 2)) + " W/mm^2",
             ])
 
-        for i in removed:
-            del solutions[i]
-        
-        global brute_force_values
-
-        cnt = 0
-        for key, value in solutions.items():
-            brute_force_values[key] = copy.deepcopy(value)
-            cnt += 1
-            if cnt == 5:
-                break
-
-
         table_options['data'] = solutions_data
 
         self.sol_table = CanvasTable(self.canvas, table_options)
 
         return height
 
-    def remove_duplicate(self, solution):
+
+    def get_bf_filtered_results(self, solutions):
+
+        solutions_filtered, removed = self.remove_duplicate_solutions(solutions)
+
+        for i in removed:
+            del solutions[i]
+
+        self.filter_brute_force_results(solutions)
+
+        return solutions_filtered
+
+
+    def filter_brute_force_results(self, solutions):
+
+        global brute_force_values
+
+        counter = 0
+        for key, value in solutions.items():
+            brute_force_values[key] = copy.deepcopy(value)
+            counter += 1
+            if counter == 5:
+                break
+
+
+    def remove_duplicate_solutions(self, solutions):
         
-        final_set = set()
-        final_list = []
-        removed_list = []
+        final_solutions = []
+        removed_solutions = []
 
-        for key in solution:
-            current_set = frozenset(solution[key]['title'].split())
-            if current_set not in final_set:
-                final_set.add(current_set)
-                final_list.append(solution[key]['title'])
+        for solution in solutions:
+            temp = solution.split()
+            temp[0], temp[1], temp[3], temp[4] = temp[3], temp[4], temp[0], temp[1]
+            if (" ".join(temp)) not in final_solutions:
+                final_solutions.append(solution)
             else:
-                removed_list.append(solution[key]['title'])
+                removed_solutions.append(solution)
 
+        # excluir depois
+        for solution in removed_solutions:
+            print(solution)
 
-        for i in removed_list:
-            print(i)
-
-        return final_list, removed_list
+        return final_solutions, removed_solutions
     
 
 class NSGAPresenter(PlotbookPresenter):
+    
     figsize = (12, 4)
 
     dpi = 100
@@ -179,6 +203,7 @@ class NSGAPresenter(PlotbookPresenter):
 
 
     def get_info(self, step_results, options=None):
+        
         return (
                 "NSGA-II generated a paretto frontier aproximation containing "
                 + str(len(step_results['solutions']))
@@ -191,6 +216,7 @@ class NSGAPresenter(PlotbookPresenter):
 
     @staticmethod
     def get_pd_performance_points(population_results):
+        
         solutions = population_results.keys()
 
         points = []
@@ -208,6 +234,7 @@ class NSGAPresenter(PlotbookPresenter):
 
     @staticmethod
     def plot_population(population_results, original_performance, original_power_density):
+        
         # type: (Dict, Tuple, Tuple) -> Figure
         points = NSGAPresenter.get_pd_performance_points(population_results)
 
@@ -301,7 +328,9 @@ class NSGAPresenter(PlotbookPresenter):
 
 
 class NSGATablePresenter(Presenter):
+    
     def __init__(self):
+        
         super(NSGATablePresenter, self).__init__()
 
         self.canvas = None
@@ -310,10 +339,13 @@ class NSGATablePresenter(Presenter):
 
         self.sol_table = None
 
+
     def present_partials(self, frame, step_results, options=None):
         raise NotImplementedError
 
+
     def present_results(self, frame, results, options=None):
+        
         if 'solutions' not in results['dsdse']:
             return 0
 
@@ -373,11 +405,13 @@ class NSGATablePresenter(Presenter):
 
         return height
 
+
     def get_info(self, step_results, options=None):
         raise NotImplemented
     
 
 class BruteForcePresenter(PlotbookPresenter):
+    
     figsize = (12, 4)
 
     dpi = 100
@@ -398,7 +432,9 @@ class BruteForcePresenter(PlotbookPresenter):
 
         #population_results = results['dsdse']['brute_force_solutions']
         global brute_force_values
+        
         population_results = copy.deepcopy(brute_force_values)
+
         brute_force_values.clear()
 
         original_performance = results['dsdse']['performance_simulation']['performance']
@@ -419,6 +455,7 @@ class BruteForcePresenter(PlotbookPresenter):
 
     @staticmethod
     def get_pd_performance_points(population_results):
+        
         solutions = population_results.keys()
 
         points = []
@@ -436,6 +473,7 @@ class BruteForcePresenter(PlotbookPresenter):
 
     @staticmethod
     def plot_population(population_results, original_performance, original_power_density):
+        
         # type: (Dict, Tuple, Tuple) -> Figure
         points = BruteForcePresenter.get_pd_performance_points(population_results)
 

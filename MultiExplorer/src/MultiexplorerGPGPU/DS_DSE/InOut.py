@@ -298,6 +298,7 @@ class InOut(object):
             self.inputDict["parameters"] = parameters
             self.inputDict["restrictions"] = restriction
 
+
             return self.inputDict
 
         descriptionInput = json.loads(open(self.inputName).read())

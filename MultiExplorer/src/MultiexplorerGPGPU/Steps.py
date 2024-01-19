@@ -8,6 +8,7 @@ class GPGPUSimulationStep(Step):
     def get_results(self):
         return self.adapter.get_results()
 
+
     def __new__(cls):
         if not hasattr(cls, 'instance'):
             cls.instance = super(
@@ -16,6 +17,7 @@ class GPGPUSimulationStep(Step):
             ).__new__(cls)
 
         return cls.instance
+
 
     def __init__(self):
         super(GPGPUSimulationStep, self).__init__()
@@ -34,8 +36,10 @@ class GPGPUSimulationStep(Step):
     def has_user_input():
         return True
 
+
     def get_user_inputs(self):
         return self.adapter.get_user_inputs()
+
 
     def __execute__(self):
         self.execution_exception = None
@@ -45,11 +49,13 @@ class GPGPUSimulationStep(Step):
         except BaseException as exception:
             self.execution_exception = exception
 
+
     def __finish__(self):
         if self.execution_exception is None:
             self.fire(Event.STEP_EXECUTION_ENDED)
         else:
             self.fire(Event.STEP_EXECUTION_FAILED, self)
+
 
     def get_presenter(self):
         return GPGPUSimPresenter()
@@ -60,8 +66,10 @@ class DSEStep(Step):
     def get_results(self):
         return self.adapter.get_results()
 
+
     def get_presenter(self):
         return NSGAPresenter()
+
 
     def __new__(cls):
         if not hasattr(cls, 'instance'):
@@ -72,18 +80,25 @@ class DSEStep(Step):
 
         return cls.instance
 
+
     def __init__(self):
         super(DSEStep, self).__init__()
 
         self.adapter = DSEAdapter()
 
-    @staticmethod
-    def get_label(): return 'DSE'
 
     @staticmethod
-    def has_user_input(): return True
+    def get_label(): 
+        return 'DSE'
 
-    def get_user_inputs(self): return self.adapter.get_user_inputs()
+    @staticmethod
+    def has_user_input(): 
+        return True
+
+
+    def get_user_inputs(self): 
+        return self.adapter.get_user_inputs()
+
 
     def __execute__(self):
         self.execution_exception = None
@@ -92,6 +107,7 @@ class DSEStep(Step):
             self.adapter.execute()
         except BaseException as exception:
             self.execution_exception = exception
+
 
     def __finish__(self):
         if self.execution_exception is None:
