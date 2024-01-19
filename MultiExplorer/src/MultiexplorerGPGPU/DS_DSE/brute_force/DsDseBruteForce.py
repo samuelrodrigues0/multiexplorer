@@ -15,8 +15,6 @@ class DsDseBruteForce(object):
         path_db=DbSelector(inputName=pathCSV).select_db()
         self.inputDict= InOut(projectFolder, inputName=pathCSV).makeInputDict()
         self.preditor= InOut(projectFolder, inputName=pathCSV).performancePreditor()
-        print("AQUI9((((((((((((((((((((((9))))))))))))))))))))))")
-        print(self.preditor)
         self.db = json.loads(open(path_db).read())
         self.pathCSV=projectFolder+"/outputBruteForce.csv"
         self.first_solution = [] #plataformas que obedecem a restricao de area 
