@@ -175,6 +175,7 @@ class GPGPUSimulatorAdapter(Adapter):
     
 
     def execute(self):
+        
         print('\n'*3 + '-'*20 + 'Simulation' + '-'*20)
         self.prepare()
         self.sim_execute()
@@ -197,6 +198,7 @@ class GPGPUSimulatorAdapter(Adapter):
 
 
     def sim_execute(self):
+        
         self.simTool.parse()
         self.simTool.execute()
         #self.simTool.convertResults()
@@ -262,6 +264,7 @@ class GPGPUSimulatorAdapter(Adapter):
 class DSEAdapter(Adapter):
 
     def __init__(self):
+        
         Adapter.__init__(self)
 
         self.set_inputs([
@@ -418,10 +421,10 @@ class DSEAdapter(Adapter):
 
         self.dse(mod_json_path)
         
-        self.register_results()
+        self.register_results() # nsga
 
         if self.inputs['settings']['dse_settings']['run_brute_force']: # arrumar depois
-            self.register_brute_force_results()
+            self.register_brute_force_results() #bruteforce
 
         #print(self.presentable_results)
 
@@ -564,6 +567,7 @@ class DSEAdapter(Adapter):
             solutions = self.brute_force.first_solution
 
         self.presentable_results['brute_force_solutions'] = {}
+        
         for solution in solutions:
             title = (
                 str(solution['amount_orig_core'])

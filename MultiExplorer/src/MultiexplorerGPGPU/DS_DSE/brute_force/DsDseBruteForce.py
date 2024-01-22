@@ -14,6 +14,8 @@ class DsDseBruteForce(object):
     def __init__(self, projectFolder, pathCSV):
         path_db=DbSelector(inputName=pathCSV).select_db()
         self.inputDict= InOut(projectFolder, inputName=pathCSV).makeInputDict()
+        print("*************")
+        print(self.inputDict)
         self.preditor= InOut(projectFolder, inputName=pathCSV).performancePreditor()
         self.db = json.loads(open(path_db).read())
         self.pathCSV=projectFolder+"/outputBruteForce.csv"
@@ -67,7 +69,7 @@ class DsDseBruteForce(object):
                         )
                     
                     _dict={"amount_orig_core":amount_orig_core, "amount_ip_core":amount_ip_core, "ip_core":ip_core,"powerDensity":str(round(float(parameters[0]), 3)),"area":parameters[1], "performance":parameters[2], "performancePred":performancePred} 
-                    self.first_solution.append(_dict)    
+                    self.first_solution.append(_dict)   
                     if is_viable(parameters):
                         self.final_solution.append(_dict)
 

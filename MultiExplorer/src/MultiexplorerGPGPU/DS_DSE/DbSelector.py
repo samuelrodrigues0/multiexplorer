@@ -49,6 +49,8 @@ class DbSelector(object):
                 if item_bd["id"] == id_input:
                     power = item_bd["pow"]
                     area =item_bd["area"]
+            print("***********")
+            print(power, area)
             return power,area
         except KeyError:
             print "The DSE constraints must have key\n'technology'= xnm\n'benchmark'=benchmark_name\n'application'=application_name"
