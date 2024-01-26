@@ -43,7 +43,7 @@ class BruteForceTablePresenter(Presenter):
         return (
                 "The brute force algorithm found "
                 + str(len(step_results['brute_force_solutions']))
-                + " viable solutions."
+                + " solutions."
         )
 
 
@@ -94,7 +94,14 @@ class BruteForceTablePresenter(Presenter):
             expand=True
         )
 
-        self.canvas.create_text(2, 2*(cell_height+2), text="Viable Solutions Found through Brute Force",
+        
+        if results['dsdse']['solution_status']['is_viable']:
+            text = "Viable Solutions Found through Brute Force (respected restrictions)"
+        else:
+            text = "No viable solutions found; brute force solutions did not respect all restrictions."
+
+
+        self.canvas.create_text(2, 2*(cell_height+2), text=text,
                                 anchor=Tkinter.NW)
 
         table_options['cells_width'] = [445, 145, 140, 140]

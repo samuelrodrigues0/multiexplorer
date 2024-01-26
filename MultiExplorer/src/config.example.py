@@ -13,3 +13,4 @@ PATH_RES = PATH_ME + '/res'
 PATH_IMG = PATH_RES + '/img'
 
 PATH_PRED_VM = PATH_ME + "/src/DS_DSE/predictors/"
+GPU_PATH = PATH_REPO + "/gpgpu-sim_distribution"

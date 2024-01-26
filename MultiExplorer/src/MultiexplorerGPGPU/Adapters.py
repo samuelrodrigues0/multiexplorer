@@ -514,7 +514,8 @@ class DSEAdapter(Adapter):
         self.presentable_results = {
             #'profile': self.profile,
             'solutions': {},
-            'performance_simulation' : {}
+            'performance_simulation' : {},
+            'solution_status': {}
         }
 
         simulation_inputs = self.brute_force.inputDict['parameters']
@@ -523,7 +524,7 @@ class DSEAdapter(Adapter):
         #print("aqui*******")
         #print(simulation_inputs)
 
-
+        #arrumar
         self.presentable_results['performance_simulation'] = {
             'performance': simulation_inputs['performance_orig'],
             'power_density': [pd, pd]
@@ -562,9 +563,11 @@ class DSEAdapter(Adapter):
             return
         
         solutions = self.brute_force.final_solution
+        self.presentable_results['solution_status'] = {'is_viable': True}
 
         if not solutions:
             solutions = self.brute_force.first_solution
+            self.presentable_results['solution_status'] = {'is_viable': False}
 
         self.presentable_results['brute_force_solutions'] = {}
         
