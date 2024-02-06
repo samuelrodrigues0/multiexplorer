@@ -519,15 +519,13 @@ class DSEAdapter(Adapter):
         }
 
         simulation_inputs = self.brute_force.inputDict['parameters']
-        pd = float(simulation_inputs["power_orig"][0])/float(simulation_inputs["area_orig"][0])
-        
-        #print("aqui*******")
-        #print(simulation_inputs)
+        orig_core_performance = self.brute_force.preditor.performance_core_original
+        pow_density = float(simulation_inputs["power_orig"][0])/float(simulation_inputs["area_orig"][0])
 
         #arrumar
         self.presentable_results['performance_simulation'] = {
-            'performance': simulation_inputs['performance_orig'],
-            'power_density': [pd, pd]
+            'performance': [orig_core_performance, orig_core_performance],
+            'power_density': [pow_density, pow_density]
         }
 
 
@@ -589,3 +587,5 @@ class DSEAdapter(Adapter):
                 'performance': round(float(solution["performancePred"]), 2),
                 'power_density': round(float(solution["powerDensity"]), 2)
             }
+        
+            

@@ -14,8 +14,6 @@ class DsDseBruteForce(object):
     def __init__(self, projectFolder, pathCSV):
         path_db=DbSelector(inputName=pathCSV).select_db()
         self.inputDict= InOut(projectFolder, inputName=pathCSV).makeInputDict()
-        print("*************")
-        print(self.inputDict)
         self.preditor= InOut(projectFolder, inputName=pathCSV).performancePreditor()
         self.db = json.loads(open(path_db).read())
         self.pathCSV=projectFolder+"/outputBruteForce.csv"
@@ -68,6 +66,7 @@ class DsDseBruteForce(object):
                         amount_orig_core
                         )
                     
+
                     _dict={"amount_orig_core":amount_orig_core, "amount_ip_core":amount_ip_core, "ip_core":ip_core,"powerDensity":str(round(float(parameters[0]), 3)),"area":parameters[1], "performance":parameters[2], "performancePred":performancePred} 
                     self.first_solution.append(_dict)   
                     if is_viable(parameters):
@@ -98,7 +97,12 @@ class DsDseBruteForce(object):
         header = 'total_area', 'total_performance',"performancePred",'total_power_density','id_ip_core', 'amount_ip_cores','performance ip', 'power ip', 'area_ip','amount_original_cores','performance_orig', 'power_orig', 'area orig'
         csvWriter.writerow(header)
 
-        for element in self.final_solution:
+        if not self.final_solution:
+            solutions = self.first_solution
+        else:
+            solutions = self.final_solution
+
+        for element in solutions:
            #_dict={"amount_orig_core":amount_orig_core, "amount_ip_core":amount_ip_core, "ip_core":ip_core,"powerDensity":parameters[0],"area":parameters[1], "performance":parameters[2]}
 
             _list=[]

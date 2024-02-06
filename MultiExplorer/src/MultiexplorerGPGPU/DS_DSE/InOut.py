@@ -225,7 +225,7 @@ class InOut(object):
         # sniperDict["performance_orig"] = performance
 
         sniperDict["performance_orig"] = self.selector.get_performance_in_db()
-        print(sniperDict)
+        #print(sniperDict)
         return sniperDict
 
     #faz o interfaceamento entre a Descrição de DSE passada pelo usuário, e o dicionário de entrada do algoritmo

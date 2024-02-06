@@ -31,7 +31,10 @@ class PerformanceGPUPredictor(object):
         # neg_mean_absolute_percentage_scorer = metrics.make_scorer(mean_absolute_percentage_error, greater_is_better=False)
         self.preditor = joblib.load(dir_path+"/predictors/"+'MLP.joblib')#carregou o preditor
         self.scaler = joblib.load(dir_path+"/predictors/"+'pipe.joblib')#carregou o escalador do conjunto de entrada
+        self.performance_core_original = self.getOriginalPerformance(self.originCoreName,self.bdModel,1,self.sharedMem,self.blocks, self.regs,self.threads, self.app, self.bdApp, self.freq)[0][0]
         #print "Pred + Escala: " + str(self.processor) + "\n"
+
+
     def logData(self,data):
         df = pd.DataFrame ([data], columns = ['Modelo', 'App', 'Shared_Mem', 'Blocks/SM', 'Number_Registers/core','Threads/SM', 'UC', 'Inst Kernel', '%Time_Kernel', 'Freq'])
         for col in set(df.columns) - set(['Modelo', 'App']):
@@ -66,6 +69,7 @@ class PerformanceGPUPredictor(object):
         #y_pred = self.predictor().predict(teste)
         y_pred= self.preditor.predict(teste)
         y_pred = np.exp(y_pred)
+
         
         return y_pred,teste
         #return str(round(float(y_pred), 3))

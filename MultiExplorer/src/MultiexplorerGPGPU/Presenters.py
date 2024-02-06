@@ -114,7 +114,6 @@ class BruteForceTablePresenter(Presenter):
             ['Architecture', 'Performance', 'Area', 'Power Density'],
         ]
 
-        
         for s in solutions_filtered:
             solutions_data.append([
                 s,
@@ -132,23 +131,32 @@ class BruteForceTablePresenter(Presenter):
 
     def get_bf_filtered_results(self, solutions):
 
-        solutions_filtered, removed = self.remove_duplicate_solutions(solutions)
+        removed = self.remove_duplicate_solutions(solutions)
 
         for i in removed:
             del solutions[i]
 
-        self.filter_brute_force_results(solutions)
+        solutions_filtered = [key for key, value in sorted(solutions.items(), key=lambda sol: float(sol[1]['performance']), reverse=True)[:11]]
+
+        self.filter_brute_force_results(solutions, solutions_filtered)
 
         return solutions_filtered
 
 
-    def filter_brute_force_results(self, solutions):
+    def filter_brute_force_results(self, solutions, top10):
 
         global brute_force_values
 
+        #counter = 0
+        #for key, value in solutions.items():
+        #    brute_force_values[key] = copy.deepcopy(value)
+        #    counter += 1
+        #    if counter == 5:
+        #        break
+
         counter = 0
-        for key, value in solutions.items():
-            brute_force_values[key] = copy.deepcopy(value)
+        for solution in top10:
+            brute_force_values[solution] = copy.deepcopy(solutions[solution])
             counter += 1
             if counter == 5:
                 break
@@ -171,7 +179,7 @@ class BruteForceTablePresenter(Presenter):
         for solution in removed_solutions:
             print(solution)
 
-        return final_solutions, removed_solutions
+        return removed_solutions
     
 
 class NSGAPresenter(PlotbookPresenter):
@@ -223,7 +231,6 @@ class NSGAPresenter(PlotbookPresenter):
 
     @staticmethod
     def get_pd_performance_points(population_results):
-        
         solutions = population_results.keys()
 
         points = []
