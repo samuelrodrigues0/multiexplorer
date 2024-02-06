@@ -579,6 +579,27 @@ class BruteForcePresenter(PlotbookPresenter):
 
         return fig
 
+    # Arrumar depois... super
+    def present_results(self, frame, results, options=None):
+
+        if 'brute_force_solutions' not in results['dsdse']:
+            return 0
+        else:
+
+            #super(BruteForcePresenter, self).present_results(frame, results, options)
+            figures = self.get_figures(results)
+
+            if not figures:
+                # nothing to present
+                return
+
+            self.create_plotbook(frame, options)
+
+            for title in figures:
+                self.add_plot(title, figures[title])
+
+            return PlotbookPresenter.PLOTBOOK_HEIGHT + 20
+
 
     def get_info(self, step_results, options=None):
         raise NotImplemented

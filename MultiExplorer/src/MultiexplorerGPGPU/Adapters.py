@@ -403,6 +403,8 @@ class DSEAdapter(Adapter):
 
         self.brute_force = None
 
+        self.nsga = None
+
         self.original_core = None
 
 
@@ -474,7 +476,7 @@ class DSEAdapter(Adapter):
     def dse(self, json_project_folder):
     
         start = time.time()
-        Nsga2Main(projectFolder, json_project_folder, self.inputs['settings'])
+        self.nsga = Nsga2Main(projectFolder, json_project_folder, self.inputs['settings'])
         print("DSE NSGA2: OK") 
         end = time.time()
         print("The time of execution of NSGA program is :", end-start)
@@ -518,8 +520,13 @@ class DSEAdapter(Adapter):
             'solution_status': {}
         }
 
-        simulation_inputs = self.brute_force.inputDict['parameters']
-        orig_core_performance = self.brute_force.preditor.performance_core_original
+        if self.brute_force:
+            simulation_inputs = self.brute_force.inputDict['parameters']
+            orig_core_performance = self.brute_force.preditor.performance_core_original
+        else:
+            simulation_inputs = self.nsga.inputDict['parameters']
+            orig_core_performance = self.nsga.preditor.performance_core_original
+        
         pow_density = float(simulation_inputs["power_orig"][0])/float(simulation_inputs["area_orig"][0])
 
         #arrumar

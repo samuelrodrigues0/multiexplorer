@@ -36,8 +36,9 @@ class Nsga2Main(object):
         pareto_front = evolution.evolve()
         #output= InOut()
         output = InOut(projectFolder, inputName)
-        preditor = output.performancePreditor()
-        output.printResults(pareto_front,preditor )
+        self.preditor = output.performancePreditor()
+        output.printResults(pareto_front,self.preditor )
+        self.inputDict= output.makeInputDict()
         #plotter.plot_x_y(collected_metrics.keys(), map(lambda (hv, hvr): hvr, collected_metrics.values()), 'generation', 'HVR', 'HVR metric for ZDT3 problem', 'hvr-zdt3')
         
 	
