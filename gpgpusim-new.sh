@@ -62,6 +62,9 @@ echo "App: \"$APPLICATION\""
 echo ""
 ##{ { nohup $APPLICATION; } | (tee BFSOutput.txt ); } 2>&1 &
 
+export CUDA_INSTALL_PATH=/usr/local/cuda
+source ../../../gpgpu-sim_distribution/setup_environment
+
 { { $APPLICATION; } > >(tee BFSOutput.txt ); } 2> >( tee BFSstderr.txt >&2 )
 
 echo ""
