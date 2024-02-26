@@ -67,15 +67,15 @@ source ../../../gpgpu-sim_distribution/setup_environment
 
 { { $APPLICATION; } > >(tee BFSOutput.txt ); } 2> >( tee BFSstderr.txt >&2 )
 
-echo ""
+#echo ""
 #echo "****************************************************************************************************************"
-echo "GPGPU-Sim finished running: \"$APPLICATION\"" 
-echo "Input =$CONFIGS_FOLDER "
-echo "Used rundir=$RUNDIR"
-echo "Output is in $RUNDIR/$BFSOUTUPUT"
-echo "Error log is in $RUNDIR/$BFSERROR"
-echo "MultiExplorer input in $RUNDIR/$JSONFILE"
-echo ""
+#echo "GPGPU-Sim finished running: \"$APPLICATION\"" 
+#echo "Input =$CONFIGS_FOLDER "
+#echo "Used rundir=$RUNDIR"
+#echo "Output is in $RUNDIR/$BFSOUTUPUT"
+#echo "Error log is in $RUNDIR/$BFSERROR"
+#echo "MultiExplorer input in $RUNDIR/$JSONFILE"
+#echo ""
 
 #pwd
 mv $BFSOUTUPUT output/

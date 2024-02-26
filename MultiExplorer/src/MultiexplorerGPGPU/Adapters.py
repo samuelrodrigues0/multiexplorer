@@ -181,6 +181,7 @@ class GPGPUSimulatorAdapter(Adapter):
         self.sim_execute()
         self.project_folder()
         self.change_json_in_project_folder()
+        self.check_results()
         print('\n'*3)
 
 
@@ -256,9 +257,32 @@ class GPGPUSimulatorAdapter(Adapter):
             json.dump(json_data, data_file, sort_keys=True, indent=4)
 
 
-    def get_results(self):
-        raise NotImplemented
-        return self.presentable_results
+    def check_results(self):
+        
+        global projectFolder
+
+        path_output = projectFolder + '/output/BFSOutput.txt'
+        path_err = projectFolder + '/output/BFSstderr.txt'
+        gpgpusim_first_finished_text = "GPGPU-Sim: *** exit detected ***"
+        gpgpusim_second_finished_text = "----------------------------END-of-Interconnect-DETAILS-------------------------\n"
+
+        try:
+            with open(path_output) as output_file:
+                output_content = output_file.readlines()
+
+            with open(path_err) as err_file:
+                err_content = err_file.readlines()
+
+            if output_content and not err_content and output_content[-1].strip() == gpgpusim_first_finished_text and \
+                gpgpusim_second_finished_text in output_content:
+                print("GPGPU-Sim finished running")
+            else:
+                raise Exception("GPGPU-Sim failed while running")
+
+        except IOError:
+            raise Exception("No GPGPU-Sim output found")
+
+                
 
 
 class DSEAdapter(Adapter):
