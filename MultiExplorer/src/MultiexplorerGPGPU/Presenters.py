@@ -30,7 +30,14 @@ class GPGPUSimPresenter(Presenter):
 
 
     def get_info(self, step_results, options=None):
-        return "Performance: " + str(step_results['performance'][0]) + " " + str(step_results['performance'][1])
+        
+        simulation_preview = (
+            "Simulation time: {} sec\n"
+            "Instruction rate: {} (inst/sec)\n"
+            "Cycles rate: {} (cycle/sec)"
+        ).format(str(step_results['simulation_time']), str(step_results['simulation_instructions_rate']), str(step_results['simulation_cycles_rate']))
+
+        return simulation_preview
 
 
 class BruteForceTablePresenter(Presenter):

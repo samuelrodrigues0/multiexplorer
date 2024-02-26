@@ -181,9 +181,14 @@ class GPGPUSimulatorAdapter(Adapter):
         self.sim_execute()
         self.project_folder()
         self.change_json_in_project_folder()
+        self.para_testes() # EXCLUIR, POIS SERA UTILIZADO APENAS PARA TESTAR
         self.check_results()
         self.register_simulation_results()
         print('\n'*3)
+
+
+    def para_testes(self):
+        time.sleep(10)
 
 
     def prepare(self):
