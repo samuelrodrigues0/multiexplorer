@@ -182,6 +182,7 @@ class GPGPUSimulatorAdapter(Adapter):
         self.project_folder()
         self.change_json_in_project_folder()
         self.check_results()
+        self.register_simulation_results()
         print('\n'*3)
 
 
@@ -282,7 +283,57 @@ class GPGPUSimulatorAdapter(Adapter):
         except IOError:
             raise Exception("No GPGPU-Sim output found")
 
+
+    def register_simulation_results(self):
+
+        global projectFolder
+
+        path = projectFolder + '/output/BFSOutput.txt'
+
+        sim_time = 0
+        sim_instructions_rate = 0
+        sim_cycles_rate = 0
+
+        try:
+            with open(path) as simulation_file:
                 
+                simulation_output = simulation_file.read()
+
+                sim_time = int(re.search(r"gpgpu_simulation_time = .* \((\d+) sec\)", simulation_output).group(1))
+                sim_instructions_rate = int(re.search(r"gpgpu_simulation_rate = (\d+) \(inst/sec\)", simulation_output).group(1))
+                sim_cycles_rate = int(re.search(r"gpgpu_simulation_rate = (\d+) \(cycle/sec\)", simulation_output).group(1))
+            
+            #    simulation_output = simulation_file.readlines()
+            
+            #for line in simulation_output:
+            #    if line.startswith("gpgpu_simulation_time"):
+            #        char = 0
+            #        string_number = ''
+            #        while line[char] != '(':
+            #            char += 1
+            #        char += 1
+            #        while line[char] != ' ':
+            #            string_number += line[char]
+            #            char += 1
+            #        sim_time = int(string_number)
+                    
+            #    elif line.startswith("gpgpu_simulation_rate") and line.endswith("(inst/sec)\n"):
+            #        sim_instructions_rate = int(line.split()[-2])
+            #    elif line.startswith("gpgpu_simulation_rate") and line.endswith("(cycle/sec)\n"):
+            #        sim_cycles_rate = int(line.split()[-2])
+
+            self.presentable_results = {
+                'simulation_time': sim_time,
+                'simulation_instructions_rate' : sim_instructions_rate,
+                'simulation_cycles_rate': sim_cycles_rate
+            }
+
+        except IOError:
+            raise "No GPGPU-Sim output found"
+
+
+    def get_results(self):
+        return self.presentable_results
 
 
 class DSEAdapter(Adapter):

@@ -64,7 +64,8 @@ class MultiexplorerGPGPUExecutionFlow(ExecutionFlow):
     def get_results(self):
        
         return {
-            "dsdse": self.steps[1].get_results(),
+            "gpgpusim": self.steps[0].get_results(),
+            "dsdse": self.steps[1].get_results()
         }
     
 
