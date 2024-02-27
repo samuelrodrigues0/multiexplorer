@@ -155,14 +155,14 @@ class Applications(Enum):
         
         return {
             Applications.asyncAPI.value: Applications.get_label(Applications.asyncAPI),
-            #Applications.backprop.value: Applications.get_label(Applications.backprop),
-            #Applications.bfs.value: Applications.get_label(Applications.bfs),
+            Applications.backprop.value: Applications.get_label(Applications.backprop),
+            Applications.bfs.value: Applications.get_label(Applications.bfs),
             Applications.clock.value: Applications.get_label(Applications.clock),
-            #Applications.dwt2d.value: Applications.get_label(Applications.dwt2d),
-            #Applications.hotspot.value: Applications.get_label(Applications.hotspot),
-            #Applications.needle.value: Applications.get_label(Applications.needle),
-            #Applications.nn.value: Applications.get_label(Applications.nn),
-            #Applications.vectorAdd.value: Applications.get_label(Applications.vectorAdd),
+            Applications.dwt2d.value: Applications.get_label(Applications.dwt2d),
+            Applications.hotspot.value: Applications.get_label(Applications.hotspot),
+            Applications.needle.value: Applications.get_label(Applications.needle),
+            Applications.nn.value: Applications.get_label(Applications.nn),
+            Applications.vectorAdd.value: Applications.get_label(Applications.vectorAdd),
         }
     
     @staticmethod
