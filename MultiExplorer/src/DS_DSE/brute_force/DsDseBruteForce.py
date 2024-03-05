@@ -75,7 +75,10 @@ class DsDseBruteForce(object):
         header = 'total_area', 'total_performance', 'performance_pred','total_power_density','id_ip_core', 'amount_ip_cores','performance ip', 'power ip', 'area_ip','amount_original_cores','performance_orig', 'power_orig', 'area orig'
         csvWriter.writerow(header)
 
-        for element in self.first_solution:
+
+        results = self.final_solution if self.final_solution else self.first_solution
+
+        for element in results:
            #_dict={"amount_orig_core":amount_orig_core, "amount_ip_core":amount_ip_core, "ip_core":ip_core,"powerDensity":parameters[0],"area":parameters[1], "performance":parameters[2]}
 
             _list=[]
