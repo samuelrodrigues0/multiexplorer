@@ -45,6 +45,7 @@ fi
 cnt=1
 APPLICATION=""
 
+
 for arg in "$@"
 do
     if [ $cnt -gt 5 ]; then
