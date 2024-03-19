@@ -2,7 +2,7 @@
 	"Preferences":
 	{
 		"sim_tool":"gpgpusim",
-		"project_name":"QV100_clock_mlp",
+		"project_name":"QV100_asyncAPI_mlp",
 		"application":"asyncAPI",
 		"DSE":true
 	},

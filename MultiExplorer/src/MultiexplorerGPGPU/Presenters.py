@@ -143,7 +143,7 @@ class BruteForceTablePresenter(Presenter):
         for i in removed:
             del solutions[i]
 
-        solutions_filtered = [key for key, value in sorted(solutions.items(), key=lambda sol: float(sol[1]['performance']), reverse=True)[:11]]
+        solutions_filtered = [key for key, value in sorted(solutions.items(), key=lambda sol: float(sol[1]['performance']), reverse=True)[:10]]
 
         self.filter_brute_force_results(solutions, solutions_filtered)
 

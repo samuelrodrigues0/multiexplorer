@@ -12,17 +12,33 @@ class DsDseBruteForce(object):
     """Main Class"""
 
     def __init__(self, projectFolder, pathCSV):
+
         path_db=DbSelector(inputName=pathCSV).select_db()
+        
         self.inputDict= InOut(projectFolder, inputName=pathCSV).makeInputDict()
+        
         self.preditor= InOut(projectFolder, inputName=pathCSV).performancePreditor()
+        
         self.db = json.loads(open(path_db).read())
-        self.pathCSV=projectFolder+"/outputBruteForce.csv"
-        self.first_solution = [] #plataformas que obedecem a restricao de area 
-        self.final_solution = [] #plataformas que obedecem a restrição de area e tem performance maxima
+        
+        self.path_all_csv = projectFolder + "/brute_force_all_solutions.csv"
+        
+        self.path_viable_csv = projectFolder + "/brute_force_viable_solutions.csv"
+        
+        self.all_solutions = [] # plataformas que obedecem a restricao de area 
+        
+        self.viable_solutions = [] # plataformas que obedecem a restrição de area e tem performance maxima
+        
         self.projectFolder = projectFolder
-        self.multiexplorerInputDict= InOut(projectFolder, inputName=pathCSV).getInputFile()
+        
+        #self.multiexplorerInputDict= InOut(projectFolder, inputName=pathCSV).getInputFile()
+        
         self.combinations()        
-        self.printCSV()
+        
+        self.output_csv(self.path_all_csv)
+        
+        self.output_csv(self.path_viable_csv, True)
+
 
     def combinations(self):
         combinationList=[]
@@ -68,11 +84,13 @@ class DsDseBruteForce(object):
                     
 
                     _dict={"amount_orig_core":amount_orig_core, "amount_ip_core":amount_ip_core, "ip_core":ip_core,"powerDensity":str(round(float(parameters[0]), 3)),"area":parameters[1], "performance":parameters[2], "performancePred":performancePred} 
-                    self.first_solution.append(_dict)   
+                    self.all_solutions.append(_dict)   
                     if is_viable(parameters):
-                        self.final_solution.append(_dict)
+                        self.viable_solutions.append(_dict)
+
 
     def calculateParameters(self, amount_original, amount_ip, ip_core):
+        
         orig_power = float(self.inputDict["parameters"]["power_orig"][1])
 
         orig_area = float(self.inputDict["parameters"]["area_orig"][1])
@@ -89,38 +107,48 @@ class DsDseBruteForce(object):
 
         return power_density, total_area, total_performance
 
-    def printCSV(self):
-        csvFile= open(self.pathCSV, "w")
-        csvWriter= csv.writer(csvFile)
 
-       # header = 'total_area', 'total_performance', 'performance_pred','total_power_density','id_ip_core', 'amount_ip_cores','performance ip', 'power ip', 'area_ip','amount_original_cores','performance_orig', 'power_orig', 'area orig'
-        header = 'total_area', 'total_performance',"performancePred",'total_power_density','id_ip_core', 'amount_ip_cores','performance ip', 'power ip', 'area_ip','amount_original_cores','performance_orig', 'power_orig', 'area orig'
-        csvWriter.writerow(header)
+    def output_csv(self, path, viable_only=False):
 
-        if not self.final_solution:
-            solutions = self.first_solution
+        csv_file = open(path, "w")
+
+        csv_writer= csv.writer(csv_file)
+
+        header = (
+            'total_area', 'total_performance', 'performance_pred', 'total_power_density',
+            'id_ip_core', 'amount_ip_cores', 'performance ip', 'power ip', 'area_ip',
+            'amount_original_cores', 'performance_orig', 'power_orig', 'area orig'
+        )
+        
+        csv_writer.writerow(header)
+
+        if viable_only:
+            solutions = self.viable_solutions
         else:
-            solutions = self.final_solution
+            solutions = self.all_solutions
 
-        for element in solutions:
+        for solution in solutions:
+           
            #_dict={"amount_orig_core":amount_orig_core, "amount_ip_core":amount_ip_core, "ip_core":ip_core,"powerDensity":parameters[0],"area":parameters[1], "performance":parameters[2]}
 
-            _list=[]
-            _list.append(element["area"])
-            _list.append(element["performance"])
-            _list.append(element["performancePred"])
-            _list.append(element["powerDensity"])
-            _list.append(element["ip_core"]["id"])
-            _list.append(element["amount_ip_core"])
-            _list.append(element["ip_core"]["perf"])
-            _list.append(element["ip_core"]["pow"])
-            _list.append(element["ip_core"]["area"])
-            _list.append(element["amount_orig_core"])
-            _list.append(self.inputDict["parameters"]["performance_orig"][1])
-            _list.append(self.inputDict["parameters"]["power_orig"][1])
-            _list.append(self.inputDict["parameters"]["area_orig"][1])
+            csv_writer.writerow([
+                str(round(solution["area"], 2)),
+                str(round(solution["performance"], 2)),
+                solution["performancePred"],
+                solution["powerDensity"],
+                solution["ip_core"]["id"],
+                solution["amount_ip_core"],
+                solution["ip_core"]["perf"],
+                solution["ip_core"]["pow"],
+                solution["ip_core"]["area"],
+                solution["amount_orig_core"],
+                self.inputDict["parameters"]["performance_orig"][1],
+                self.inputDict["parameters"]["power_orig"][1],
+                self.inputDict["parameters"]["area_orig"][1]
+            ])
 
-            csvWriter.writerow(_list)
-        csvFile.close()
+        csv_file.close()
+
+        
 if __name__ == "__main__":
     objDse = DsDseBruteForce()

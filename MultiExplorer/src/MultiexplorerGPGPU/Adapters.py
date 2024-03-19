@@ -181,14 +181,20 @@ class GPGPUSimulatorAdapter(Adapter):
         self.sim_execute()
         self.project_folder()
         self.change_json_in_project_folder()
-        self.para_testes() # EXCLUIR, POIS SERA UTILIZADO APENAS PARA TESTAR
+        #self.gambiarra_sem_gpu() # EXCLUIR, POIS SERA UTILIZADO APENAS PARA TESTAR
         self.check_results()
         self.register_simulation_results()
         print('\n'*3)
 
 
-    def para_testes(self):
-        time.sleep(10)
+    def gambiarra_sem_gpu(self): # EXCLUIR
+        
+        global projectFolder
+
+        path_origem = projectFolder + '/../EXCLUIR.txt'
+        path_destino = projectFolder + '/output/BFSOutput.txt'
+
+        os.system('cp ' + path_origem + ' ' + path_destino)
 
 
     def prepare(self):
@@ -295,37 +301,25 @@ class GPGPUSimulatorAdapter(Adapter):
 
         path = projectFolder + '/output/BFSOutput.txt'
 
-        sim_time = 0
-        sim_instructions_rate = 0
-        sim_cycles_rate = 0
-
         try:
             with open(path) as simulation_file:
                 
-                simulation_output = simulation_file.read()
+                simulation_output = simulation_file.readlines()
+
+                output_length = len(simulation_output)
+
+                gpgpusim__text = "----------------------------END-of-Interconnect-DETAILS-------------------------\n"
+
+                i = 1
+                while(simulation_output[-i] != gpgpusim__text):
+                    i += 1
+
+                simulation_output = "".join(simulation_output[output_length - i:])
 
                 sim_time = int(re.search(r"gpgpu_simulation_time = .* \((\d+) sec\)", simulation_output).group(1))
                 sim_instructions_rate = int(re.search(r"gpgpu_simulation_rate = (\d+) \(inst/sec\)", simulation_output).group(1))
                 sim_cycles_rate = int(re.search(r"gpgpu_simulation_rate = (\d+) \(cycle/sec\)", simulation_output).group(1))
-            
-            #    simulation_output = simulation_file.readlines()
-            
-            #for line in simulation_output:
-            #    if line.startswith("gpgpu_simulation_time"):
-            #        char = 0
-            #        string_number = ''
-            #        while line[char] != '(':
-            #            char += 1
-            #        char += 1
-            #        while line[char] != ' ':
-            #            string_number += line[char]
-            #            char += 1
-            #        sim_time = int(string_number)
-                    
-            #    elif line.startswith("gpgpu_simulation_rate") and line.endswith("(inst/sec)\n"):
-            #        sim_instructions_rate = int(line.split()[-2])
-            #    elif line.startswith("gpgpu_simulation_rate") and line.endswith("(cycle/sec)\n"):
-            #        sim_cycles_rate = int(line.split()[-2])
+
 
             self.presentable_results = {
                 'simulation_time': sim_time,
@@ -647,11 +641,11 @@ class DSEAdapter(Adapter):
         if not self.brute_force:
             return
         
-        solutions = self.brute_force.final_solution
+        solutions = self.brute_force.viable_solutions
         self.presentable_results['solution_status'] = {'is_viable': True}
 
         if not solutions:
-            solutions = self.brute_force.first_solution
+            solutions = self.brute_force.all_solutions
             self.presentable_results['solution_status'] = {'is_viable': False}
 
         self.presentable_results['brute_force_solutions'] = {}
