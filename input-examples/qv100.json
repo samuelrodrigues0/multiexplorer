@@ -1,0 +1,43 @@
+{
+	"Preferences":
+	{
+		"sim_tool":"gpgpusim",
+		"project_name":"QV100_asyncAPI_mlp",
+		"application":"asyncAPI",
+		"DSE":true
+	},
+	"General_Modeling":
+	{
+		"model_name":"QV100",
+		"clock_rate": 1132,
+		"n_SM": 40,
+		"shmem_size":32768,
+		"registers":65536,
+		"blocks/SM":32,
+		"threads/SM":2048,
+		"gpuwattch": 1, 		
+		
+		"power":
+		{
+			"vdd":"1.2",
+			"technology_node":"22",
+			"temperature": "330"
+		}
+	},
+
+	"DSE":
+	{
+		"ExplorationSpace":{
+		"ip_cores_for_design":[1, 25],
+	        "original_cores_for_design":[1, 15]
+		},
+		"Constraints":
+		{
+			"maximum_powerDensity":0.22,
+			"maximum_area":1854,
+			"technology":"22nm",
+			"benchmark":"Experimentos",
+			"application":"clock"
+		}
+	}
+}
