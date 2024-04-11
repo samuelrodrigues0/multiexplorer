@@ -1,0 +1,36 @@
+{
+    "General_Modeling": {
+        "mips": 0, 
+        "price": 0.0, 
+        "coresVM": 0, 
+        "model_name": "", 
+        "memory": 0
+    }, 
+    "DSE": {
+        "Constraints": {
+            "benchmark": "Experimentos", 
+            "maximum_cost": 0.0, 
+            "technology": "vm", 
+            "maximum_time": 0.0, 
+            "application": "all_vm"
+        }, 
+        "ExplorationSpace": {
+            "instructions_for_design": 0, 
+            "sup_vm_for_design": [
+                0, 
+                0
+            ], 
+            "original_vm_for_design": [
+                0, 
+                0
+            ], 
+            "corescloudlet_for_design":0
+        }
+    }, 
+    "Preferences": {
+        "application": 0, 
+        "project_name": "", 
+        "simtool": "cloudsim", 
+        "DSE": "true"
+    }
+}
