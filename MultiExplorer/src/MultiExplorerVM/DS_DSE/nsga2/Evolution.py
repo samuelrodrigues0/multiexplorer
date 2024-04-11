@@ -8,8 +8,8 @@ from MultiExplorer.src.MultiExplorerVM.DS_DSE.nsga2.Population import Population
 
 class Evolution(object):
     
-    def __init__(self, problem, num_of_generations, num_of_individuals, projectFolder):
-        self.utils = NSGA2Utils(problem, num_of_individuals, projectFolder)
+    def __init__(self, problem, num_of_generations, num_of_individuals, projectFolder, inputName=None):
+        self.utils = NSGA2Utils(problem, num_of_individuals, projectFolder, inputName=inputName)
 
         self.population = None
         self.num_of_generations = num_of_generations

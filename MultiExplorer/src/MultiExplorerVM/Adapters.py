@@ -1,24 +1,21 @@
 # -*- coding: utf-8 -*-
+
 import json
-import os
-import sys
-import re
-from typing import Dict, Union, Any, Optional
-from xml.dom import minidom
-from xml.etree import ElementTree
-from MultiExplorer.src.MultiExplorerVM.AllowedValues import PredictedModels, \
-    PredictedApplications, Applications
-from MultiExplorer.src.MultiExplorerVM.DS_DSE.Nsga2MainVM import Nsga2Main
-from MultiExplorer.src.Infrastructure.ExecutionFlow import Adapter
-from MultiExplorer.src.Infrastructure.Inputs import Input, InputGroup, InputType
-from MultiExplorer.src.config import PATH_PRED_VM
+from os import listdir
+from os.path import exists
+from shutil import copyfile, move
+from AllowedValues import PATH_VM
+from AllowedValues import PredictedModels, PredictedApplications
+from .DS_DSE.Nsga2MainVM import Nsga2Main
+from ..Infrastructure.Inputs import Input, InputGroup, InputType
+from ..Infrastructure.ExecutionFlow import Adapter
+from .DS_DSE.brute_force.DsDseBruteForce import DsDseBruteForce
 
 
 class CloudsimAdapter(Adapter):
+   
     def __init__(self):
         Adapter.__init__(self)
-
-        self.presenter = None
 
         self.set_inputs([
             InputGroup({
@@ -63,39 +60,64 @@ class CloudsimAdapter(Adapter):
             })
         ])
 
-        self.config = {}
+        self.project_folder = None
 
-        self.results = {}
+        self.application_code = None
 
-        self.presentable_results = None
+        self.input_json = PATH_VM + 'sketch.json'
 
-        self.use_benchmarks = True
+    def execute(self):
+        self.prepare()
 
-        self.benchmark_size = None
+    def prepare(self):
+        self.project_folder = self.get_output_path()
+        self.application_code = PredictedApplications.get_instructions_for_design(self.inputs['application']['application_vm'])
+        self.copy_json_to_project_folder()
+        self.change_json_parameters()
 
-        self.dse_settings_file_name = None
+    def copy_json_to_project_folder(self):
+        destinated_json = self.create_project_folder_json()
+        try:
+            copyfile(self.input_json, destinated_json)
+        except OSError as err_message:
+            raise OSError('Error while copying %s to %s : %s' % (self.input_json, destinated_json, err_message))
+        self.input_json = destinated_json
+        
+    def create_project_folder_json(self):
+        path = self.project_folder + '/' + PredictedModels.get_model_name(self.inputs['application']["model_vm"]) + '.json'
+        try:
+            with open(path, 'w'):
+                pass
+        except OSError as err_message:
+            raise OSError('Can\'t create %s : %s' % (path, err_message))
 
-        self.cfg_path = None
+        return path
 
-        self.output_path = None
+    def change_json_parameters(self):
+        try:
+            with open(self.input_json, 'r') as json_r:
+                json_data = json.load(json_r)
 
+            model = self.inputs['application']['model_vm']
+            json_data['General_Modeling']['mips'] = PredictedModels.get_mips(model)
+            json_data['General_Modeling']['price'] = PredictedModels.get_price(model)
+            json_data['General_Modeling']['memory'] = PredictedModels.get_memory(model)
+            json_data['General_Modeling']['coresVM'] = PredictedModels.get_coresVM(model)
+            json_data['General_Modeling']['model_name'] = PredictedModels.get_model_id(model)
+            json_data['Preferences']['application'] = self.application_code
+            json_data['Preferences']['project_name'] = json_data['General_Modeling']['model_name'] + '-' + str(self.application_code)
+            json_data['DSE']['Constraints']['maximum_cost'] = float(self.inputs['constraints']['maximum_cost'])
+            json_data['DSE']['Constraints']['maximum_time'] = float(self.inputs['constraints']['maximum_time'])
+            json_data['DSE']['ExplorationSpace']['instructions_for_design'] = self.application_code
 
-    def set_values_from_json(self, absolute_file_path):
-        """
-        This method reads a json file and sets the values of the inputs.
-        """
-        input_json = json.loads(open(absolute_file_path).read())
+            with open(self.input_json, 'w') as json_w:
+                json.dump(json_data, json_w, indent=4)
+                
+        except OSError as err_message:
+            raise OSError('Error from %s : %s' % (self.input_json, err_message))
 
-# Organizar os sets para o json
-
-""""
-criar um get para juntar as infos 
-"""
 
 class NsgaIIPredDSEAdapter(Adapter):
-    """
-        For VM.
-    """
 
     def __init__(self):
         Adapter.__init__(self)
@@ -105,6 +127,14 @@ class NsgaIIPredDSEAdapter(Adapter):
                 'label': "Exploration Space",
                 'key': 'exploration_space',
                 'inputs': [
+                    Input({
+                        'label': 'Run brute force aswell',
+                        'key': 'run_brute_force',
+                        "is_user_input": True,
+                        "required": False,
+                        'type': InputType.Checkbutton,
+                        'value': True,
+                    }),
                     Input({
                         'label': 'Cores Cloudlet for design',
                         'key': 'corescloudlet_for_design',
@@ -135,209 +165,58 @@ class NsgaIIPredDSEAdapter(Adapter):
             }),
         ])
 
-        self.dse_engine = None
+        self.dsdse = None
 
+        self.brute_force = None
+
+        self.project_folder = None
+
+        self.input_json = None
+        
     def execute(self):
         self.prepare()
+        
+        if self.inputs['exploration_space']['run_brute_force']:
+            self.dseBruteForce()
+        
+        self.dse()
 
-        self.dse_engine.run()
+    def get_json_name(self):
+        dir_names = listdir(self.project_folder)
+        jsons = [dir for dir in dir_names if dir.endswith(".json")]
+        
+        assert len(jsons) != 0, "No input json in project folder"
+        
+        return jsons[0]
+    
+    def get_input_json(self):
+        return self.project_folder + '/' + self.get_json_name()
 
-        self.register_results()
-
-    def register_results(self):
-        results = {}
-
+    def change_json_parameters(self):
         try:
-            population_results = json.load(open(self.get_output_path() + "/population_results.json"))
+            with open(self.input_json) as json_r:
+                json_data = json.load(json_r)
+                
+            json_data['DSE']['ExplorationSpace']['original_vm_for_design'][0] = int(self.inputs['exploration_space']['original_vm_for_design'][0])
+            json_data['DSE']['ExplorationSpace']['original_vm_for_design'][1] = int(self.inputs['exploration_space']['original_vm_for_design'][1])
+            json_data['DSE']['ExplorationSpace']['sup_vm_for_design'][0] = int(self.inputs['exploration_space']['sup_vm_for_design'][0])
+            json_data['DSE']['ExplorationSpace']['sup_vm_for_design'][1] = int(self.inputs['exploration_space']['sup_vm_for_design'][1])
+            json_data['DSE']["ExplorationSpace"]['corescloudlet_for_design'] = int(self.inputs['exploration_space']['corescloudlet_for_design'])
 
-            results['population_results'] = population_results
-        except IOError:
-            results['population_results'] = None
-
-        try:
-            dse_settings = json.load(open(self.get_output_path() + "/dse_settings.json"))
-
-            orig_core = dse_settings['processor'] + '_' + dse_settings['technology']
-        except IOError:
-            orig_core = None
-
-        self.results = results
-
-        self.presentable_results = {
-            'profile': self.profile,
-            'solutions': {},
-        }
-
-        solution_cores = []
-
-        for s in results['population_results']:
-            solution = results['population_results'][s]
-
-            title = (
-                str(solution['amount_original_cores'])
-                + "x " + orig_core
-                + " & " + str(solution['amount_ip_cores'])
-                + "x " + solution['core_ip']['id']
-            )
-
-            self.presentable_results['solutions'][title] = {
-                'title': title,
-                'nbr_ip_cores': solution['amount_ip_cores'],
-                'nbr_orig_cores': solution['amount_original_cores'],
-                'ip_core': solution['core_ip']['id'],
-                'orig_core': orig_core,
-                'total_nbr_cores': solution['amount_ip_cores'] + solution['amount_original_cores'],
-                'total_area': solution['Results']['total_area'],
-                'performance': abs(float(solution['Results']['performance_pred'])),
-                'power_density': solution['Results']['total_power_density']
-            }
-
-    def get_results(self):
-        return self.presentable_results
-
+            with open(self.input_json, 'w') as json_w:
+                json.dump(json_data, json_w, indent=4)
+        except OSError as err_message:
+            raise OSError('Error from %s : %s' % (self.input_json, err_message))
+        
     def prepare(self):
-        settings = self.get_settings()
+        self.project_folder = self.get_output_path()
+        self.input_json = self.get_input_json()    
+        self.change_json_parameters()
 
-        self.register_profile(settings)
+    def dse(self):
+        self.dse = Nsga2Main(self.project_folder, self.input_json)
+        print ("DSE NSGA2: OK")
 
-        self.register_db(settings)
-
-        self.dse_engine = Nsga2Main(settings)
-
-    def register_profile(self, settings):
-        self.profile = {
-            'model': settings['dse']['processor'],
-            'process': settings['dse']['technology'],
-            'frequency': settings['dse']['frequency'],
-            'core_area': settings['mcpat_results']['total_cores']['area'],
-            'core_number': settings['sniper_results']['ncores'],
-            'power': settings['mcpat_results']['processor']['peak_power'],
-            'chip_area': settings['mcpat_results']['processor']['area'],
-            'power_density': (
-                round(float(settings['mcpat_results']['processor']['power_density'][0]), 2),
-                'V/mm^2'
-            ),
-            'performance': settings['dse']['original_performance'],
-            'ds_area': (
-                round(float(settings['mcpat_results']['integer_alus']['area_ds'][0]), 2),
-                'mm^2'
-            ),
-            'ds_percentage': (
-                round(float(settings['mcpat_results']['integer_alus']['%ds'][0]), 2),
-                '%'
-            ),
-        }
-
-        file_path = self.get_output_path() + "/profile.json"
-
-        with open(file_path, 'w') as profile_json:
-            json.dump(self.profile, profile_json, indent=4)
-
-    def register_db(self, settings):
-        nbr_of_cores = settings['sniper_results']['ncores']
-
-        total_ic = 0
-
-        for ic in settings['sniper_results']['performance_model.instruction_count']:
-            total_ic += ic
-
-        self.db = {
-            'id': settings['dse']['processor'] + settings['dse']['technology'],
-            'pow': round(float(settings['mcpat_results']['processor']['peak_power'][0]) / nbr_of_cores, 2),
-            'area': round(float(settings['mcpat_results']['processor']['area'][0]) / nbr_of_cores, 2),
-            'perf': round(float(settings['dse']['original_performance'][0]) / nbr_of_cores, 2),
-            'freq': settings['dse']['frequency'],
-            'cpi': round(settings['sniper_results']['performance_model.cycle_count'][0] / total_ic, 10),
-        }
-
-        file_path = self.get_output_path() + "/db.json"
-
-        with open(file_path, 'w') as db_json:
-            json.dump(self.db, db_json, indent=4)
-
-    def get_settings(self):
-        self.read_dse_settings()
-
-        self.read_mcpat_results()
-
-        self.read_sniper_results()
-
-        settings = {
-            'project_folder': self.get_project_folder(),
-            'mcpat_results': self.mcpat_results,
-            'sniper_results': self.sniper_results,
-            'dse': self.dse_settings,
-        }
-
-        json_dsdse_input_file_path = self.get_output_path() + "/dsdse_input.json"
-
-        with open(json_dsdse_input_file_path, 'w') as json_output_file:
-            json.dump(settings, json_output_file, indent=4)
-
-        return settings
-
-    def read_mcpat_results(self):
-        self.mcpat_results = json.loads(open(self.get_mcpat_results_json_file_path()).read())
-
-        return self.mcpat_results
-
-    def get_mcpat_results_json_file_path(self):
-        if self.mcpat_results_json_file_name is None:
-            return self.get_project_folder() + "/mcpat_results.json"
-
-    def read_sniper_results(self):
-        self.sniper_results = json.loads(open(self.get_sniper_results_json_file_path()).read())
-
-    def get_sniper_results_json_file_path(self):
-        if self.sniper_results_json_file_name is None:
-            return self.get_project_folder() + "/sniper_results.json"
-
-        return self.get_project_folder() + "/" + self.sniper_results_json_file_name
-
-    def read_dse_settings(self):
-        self.dse_settings = json.loads(open(self.get_dse_settings_file_path()).read())
-
-        self.set_dse_settings_from_inputs([
-            'num_of_generations',
-            'num_of_individuals',
-            'mutation_strength',
-            'mutation_rate',
-            'exploration_space',
-            'constraints',
-            'original_cores_for_design',
-            'ip_cores_for_design',
-            'maximum_power_density',
-            'maximum_area',
-        ])
-
-    def set_dse_settings_from_inputs(self, keys=None):
-        # type: (Optional[List[str]]) -> None
-        if self.dse_settings is None:
-            self.dse_settings = {}
-
-        self.dse_settings['num_of_generations'] = int(self.inputs['nsga_parameters']['num_of_generations'])
-        self.dse_settings['num_of_individuals'] = int(self.inputs['nsga_parameters']['num_of_individuals'])
-        self.dse_settings['mutation_strength'] = float(self.inputs['nsga_parameters']['mutation_strength'])
-        self.dse_settings['mutation_rate'] = float(self.inputs['nsga_parameters']['mutation_rate'])
-
-        for key in self.inputs:
-            if (keys is not None) and (key not in keys):
-                continue
-
-            if isinstance(self.inputs[key], Input):
-                self.dse_settings[key] = self.inputs[key].get_typed_value()
-            elif isinstance(self.inputs[key], InputGroup):
-                self.dse_settings.update(self.inputs[key].get_dict(None, keys))
-
-    def get_dse_settings_file_path(self):
-        return self.get_project_folder() + "/" + self.get_dse_settings_file_name()
-
-    def get_dse_settings_file_name(self):
-        if self.dse_settings_file_name is None:
-            return "dse_settings.json"
-
-        return self.get_dse_settings_file_name
-
-    def get_project_folder(self):
-        if self.project_path is None:
-            return self.get_output_path()
+    def dseBruteForce(self):
+        self.brute_force = DsDseBruteForce(self.project_folder, self.input_json)
+        print ("DSE Brute Force: OK")

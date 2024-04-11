@@ -8,7 +8,7 @@ import sys
 cwd = os.getcwd()
 
 
-path = "MultiExplorer/src/DS_DSE/cloudsim-3.0.3/examples/org/cloudbus/cloudsim/examples/"
+path = "MultiExplorer/src/MultiExplorerVM/DS_DSE/cloudsim/examples/org/cloudbus/cloudsim/examples/"
 commandLineCompile = "javac -classpath jars/cloudsim-3.0.3.jar:examples examples/org/cloudbus/cloudsim/examples/CloudSimExample1.java"
 commandLineExecute = "java -classpath jars/cloudsim-3.0.3.jar:examples org.cloudbus.cloudsim.examples.CloudSimExample1 > output.txt"
 

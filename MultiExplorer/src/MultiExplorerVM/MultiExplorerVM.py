@@ -1,14 +1,11 @@
 import os
 import tkMessageBox
-
-from MultiExplorer.src.Infrastructure.Events import Event
-from MultiExplorer.src.Infrastructure.ExecutionFlow import ExecutionFlow
-from MultiExplorer.src.config import PATH_RUNDIR
 from Steps import CloudSimStep, NSGAIIDSEStep
+from ..config import PATH_RUNDIR
+from ..Infrastructure.Events import Event
+from ..Infrastructure.ExecutionFlow import ExecutionFlow
 
 class MultiExplorerVMExecutionFlow(ExecutionFlow):
-
-
     @staticmethod
     def get_info():
         return (

@@ -1,7 +1,9 @@
-from MultiExplorer.src.CPUHeterogeneousMulticoreExploration.Presenters import NSGAPresenter
-from MultiExplorer.src.Infrastructure.Events import Event
-from MultiExplorer.src.Infrastructure.ExecutionFlow import Step
+import os
+import sys
 from Adapters import CloudsimAdapter, NsgaIIPredDSEAdapter
+from ..Infrastructure.Events import Event
+from ..Infrastructure.ExecutionFlow import Step
+
 
 class CloudSimStep(Step):
 

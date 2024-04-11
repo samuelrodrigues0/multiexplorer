@@ -1,18 +1,22 @@
 # -*- coding: UTF-8 -*-
 """Module with definition of DS_DSE problem interface"""
-import sys, os, json, math
-sys.path.append(os.path.dirname(os.path.realpath(__file__))+'/../../../../')
-from MultiExplorer.src.MultiExplorerVM.DS_DSE.nsga2.Individual import Individual
-from MultiExplorer.src.MultiExplorerVM.DS_DSE.nsga2.problems import Problem
-from MultiExplorer.src.MultiExplorerVM.DS_DSE.InOutVM import InOut
-from MultiExplorer.src.MultiExplorerVM.DS_DSE.DbSelector import DbSelector
+import os
+import sys
+import math
+import json
 import random
 import functools
+from ....InOutVM import InOut
+from ...Individual import Individual
+from ....DbSelectorVM import DbSelector
+sys.path.append(os.path.dirname(os.path.realpath(__file__))+'/../../../../')
+from MultiExplorer.src.MultiExplorerVM.DS_DSE.nsga2.problems import Problem
 
 class DS_DSE(Problem):
     """ Definition of DS_DSE problem"""
-    def __init__(self, DSEDefinitions, projectFolder, path_db = DbSelector(inputName=sys.argv[1]).select_db()):
-        inputNsga= InOut(projectFolder)
+    def __init__(self, DSEDefinitions, projectFolder, inputName):
+        path_db = DbSelector(inputName=inputName).select_db()
+        inputNsga= InOut(projectFolder, inputName)
         self.dict_entry= inputNsga.makeInputDict()
         self.dse_definitions = DSEDefinitions
         self.max_objectives = [None, None, None]

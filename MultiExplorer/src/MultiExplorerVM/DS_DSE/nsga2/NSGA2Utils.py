@@ -1,17 +1,19 @@
 # -*- coding: UTF-8 -*-
 
 """NSGA-II related functions"""
-import sys, os
-
-sys.path.append(os.path.dirname(os.path.realpath(__file__))+'/../../')
-import functools, json
-from MultiExplorer.src.MultiExplorerVM.DS_DSE.nsga2.Population import Population
-from MultiExplorer.src.MultiExplorerVM.DS_DSE.DbSelector import DbSelector
+import os
+import sys
+import json
 import random
-from MultiExplorer.src.MultiExplorerVM.DS_DSE.InOutVM import InOut
+import functools
+from Population import Population
+from ..InOutVM import InOut
+from ..DbSelectorVM import DbSelector
+
+
 class NSGA2Utils(object):
 
-    def __init__(self, problem, num_of_individuals, projectFolder, mutation_rate= 0.9 ,mutation_strength=0.01, num_of_genes_to_mutate=2, num_of_tour_particips=2):
+    def __init__(self, problem, num_of_individuals, projectFolder, mutation_rate= 0.9 ,mutation_strength=0.01, num_of_genes_to_mutate=2, num_of_tour_particips=2, inputName=None):
 
         self.problem = problem
         self.num_of_individuals = num_of_individuals
@@ -20,8 +22,8 @@ class NSGA2Utils(object):
         self.number_of_genes_to_mutate = num_of_genes_to_mutate
         self.num_of_tour_particips = num_of_tour_particips
 
-        self.bd= json.loads(open(DbSelector(inputName=sys.argv[1]).select_db()).read())
-        inputNsga= InOut(projectFolder)
+        self.bd= json.loads(open(DbSelector(inputName=inputName).select_db()).read())
+        inputNsga= InOut(projectFolder, inputName)
         self.dict_entry= inputNsga.makeInputDict()
 
     def fast_nondominated_sort(self, population):
