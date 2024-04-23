@@ -6,6 +6,7 @@ from os.path import exists
 from shutil import copyfile, move
 from AllowedValues import PATH_VM
 from AllowedValues import PredictedModels, PredictedApplications
+from .DS_DSE.cloudsim.CloudSim import CloudSim
 from .DS_DSE.Nsga2MainVM import Nsga2Main
 from ..Infrastructure.Inputs import Input, InputGroup, InputType
 from ..Infrastructure.ExecutionFlow import Adapter
@@ -57,6 +58,20 @@ class CloudsimAdapter(Adapter):
                         "required": True,
                     }),
                 ]
+            }),
+            InputGroup({
+                'label': 'Cores Cloud set',
+                'key': 'corescloudset',
+                "inputs": [
+                    Input({
+                        'label': 'Cores Cloudlet for design',
+                        'key': 'corescloudlet_for_design',
+                        "is_user_input": True,
+                        "required": True,
+                        'type': InputType.Integer,
+                        'max_val': 32,
+                    })
+                ]
             })
         ])
 
@@ -66,14 +81,50 @@ class CloudsimAdapter(Adapter):
 
         self.input_json = PATH_VM + 'sketch.json'
 
+        self.input_json_data = None
+
+        self.cloudsim = None
+
+        self.presentable_results = None
+
+    def get_results(self):
+        return self.presentable_results
+
     def execute(self):
         self.prepare()
+
+        mips = self.input_json_data['General_Modeling']['mips']
+        price = self.input_json_data['General_Modeling']['price']
+        cores_vm = self.input_json_data['General_Modeling']['coresVM']
+        memory = self.input_json_data['General_Modeling']['memory']
+        cores_cloudlet_for_design = self.input_json_data['DSE']['ExplorationSpace']['corescloudlet_for_design']
+        app = self.input_json_data['Preferences']['application']
+
+        # (inputMips,  inputSize,  inputRam,     inputCpus,                       inputCoresCloudlet,                    inputLengthCloudlet): parametros
+        # (mips_orig,      10000,       512,  coresvm_orig,  int(cores_cloudlet_orig/amount_orig_vm),  int(instructions_orig/amount_orig_vm)) utilizado pelo danilo
+        print(mips, 10000, memory, cores_vm, cores_cloudlet_for_design, app)
+        self.cloudsim = CloudSim(mips, 10000, memory, cores_vm, cores_cloudlet_for_design, app)
+        time = self.cloudsim.getTime()
+        time = float(time.replace(',', '.')) / 3600 # horas
+        time = time % 0.7 # RETIRAR DEPOIS, COLOQUEI APENAS PARA NAO ESTRAGAR O GRAFICO. ARRUMAR O GET_TIME DO SIMULADOR
+        self.set_presentable_results(time, price)
+
+    def set_presentable_results(self, time, price):
+        self.presentable_results = {
+            'original_time' : time,
+            'original_price' : price
+        }
 
     def prepare(self):
         self.project_folder = self.get_output_path()
         self.application_code = PredictedApplications.get_instructions_for_design(self.inputs['application']['application_vm'])
         self.copy_json_to_project_folder()
         self.change_json_parameters()
+        self.get_json_data()
+
+    def get_json_data(self):
+        with open(self.input_json, 'r') as json_file:
+            self.input_json_data = json.load(json_file)
 
     def copy_json_to_project_folder(self):
         destinated_json = self.create_project_folder_json()
@@ -109,6 +160,7 @@ class CloudsimAdapter(Adapter):
             json_data['DSE']['Constraints']['maximum_cost'] = float(self.inputs['constraints']['maximum_cost'])
             json_data['DSE']['Constraints']['maximum_time'] = float(self.inputs['constraints']['maximum_time'])
             json_data['DSE']['ExplorationSpace']['instructions_for_design'] = self.application_code
+            json_data['DSE']["ExplorationSpace"]['corescloudlet_for_design'] = int(self.inputs['corescloudset']['corescloudlet_for_design'])
 
             with open(self.input_json, 'w') as json_w:
                 json.dump(json_data, json_w, indent=4)
@@ -136,14 +188,6 @@ class NsgaIIPredDSEAdapter(Adapter):
                         'value': True,
                     }),
                     Input({
-                        'label': 'Cores Cloudlet for design',
-                        'key': 'corescloudlet_for_design',
-                        "is_user_input": True,
-                        "required": True,
-                        'type': InputType.Integer,
-                        'max_val': 32,
-                    }),
-                    Input({
                         'label': 'Original number VM for design',
                         'key': 'original_vm_for_design',
                         "is_user_input": True,
@@ -165,21 +209,31 @@ class NsgaIIPredDSEAdapter(Adapter):
             }),
         ])
 
-        self.dsdse = None
+        self.nsga = None
 
         self.brute_force = None
 
         self.project_folder = None
 
         self.input_json = None
+
+        self.json_data = None
         
+        self.original_core = None
+
+        self.presentable_results = None
+
     def execute(self):
         self.prepare()
         
         if self.inputs['exploration_space']['run_brute_force']:
-            self.dseBruteForce()
+            self.dse_brute_force()
         
         self.dse()
+
+        self.register_nsga_results()
+
+        self.register_brute_force_results()
 
     def get_json_name(self):
         dir_names = listdir(self.project_folder)
@@ -201,22 +255,113 @@ class NsgaIIPredDSEAdapter(Adapter):
             json_data['DSE']['ExplorationSpace']['original_vm_for_design'][1] = int(self.inputs['exploration_space']['original_vm_for_design'][1])
             json_data['DSE']['ExplorationSpace']['sup_vm_for_design'][0] = int(self.inputs['exploration_space']['sup_vm_for_design'][0])
             json_data['DSE']['ExplorationSpace']['sup_vm_for_design'][1] = int(self.inputs['exploration_space']['sup_vm_for_design'][1])
-            json_data['DSE']["ExplorationSpace"]['corescloudlet_for_design'] = int(self.inputs['exploration_space']['corescloudlet_for_design'])
 
             with open(self.input_json, 'w') as json_w:
                 json.dump(json_data, json_w, indent=4)
         except OSError as err_message:
             raise OSError('Error from %s : %s' % (self.input_json, err_message))
-        
+
+    def get_json_data(self):
+        with open(self.input_json) as json_file:
+            self.json_data = json.load(json_file)
+
     def prepare(self):
         self.project_folder = self.get_output_path()
         self.input_json = self.get_input_json()    
         self.change_json_parameters()
+        self.get_json_data()
 
     def dse(self):
-        self.dse = Nsga2Main(self.project_folder, self.input_json)
-        print ("DSE NSGA2: OK")
+        self.nsga = Nsga2Main(self.project_folder, self.input_json)
+        print("DSE NSGA2: OK")
 
-    def dseBruteForce(self):
+    def dse_brute_force(self):
         self.brute_force = DsDseBruteForce(self.project_folder, self.input_json)
-        print ("DSE Brute Force: OK")
+        print("DSE Brute Force: OK")
+
+    def register_nsga_results(self):
+        
+        results = {}
+
+        try:
+            population_results = json.load(open(self.project_folder + "/populationResults.json"))
+            results['population_results'] = population_results
+        except IOError:
+            results['population_results'] = None
+
+        try:
+            orig_core = self.json_data["General_Modeling"]["model_name"]
+            self.original_core = orig_core
+        except IOError:
+            orig_core = None
+
+        self.presentable_results = {
+            'nsga_solutions': {}
+        }
+
+
+        for s in results['population_results']:
+            solution = results['population_results'][s]
+
+            title = (
+                str(solution['amount_original_vm'])
+                + "x " + self.original_core
+                + " & " + str(solution['amount_sup_vm'])
+                + "x " + solution['core_ip']['id']
+            )
+            self.presentable_results['nsga_solutions'][title] = {
+                'title': title,
+                'nbr_sup_core' : solution['amount_sup_vm'],
+                'nbr_orig_core' : solution['amount_original_vm'],
+                'ip_core' : solution['core_ip']['id'],
+                'ip' : solution['core_ip'],
+                'orig_core' : self.original_core,
+                'total_nbr_cores' : solution['amount_sup_vm'] + solution['amount_original_vm'],
+                'total_cost' : solution['Results']['total_cost'],
+                'total_time' : solution['Results']['total_time'],
+                'cost_pred' : solution['Results']['cost_pred'],
+                'time_pred' : solution['Results']['time_pred']*1000,
+            }
+
+    def register_brute_force_results(self):
+        
+        if not self.brute_force:
+            return
+
+        assert self.presentable_results is not None, "register_nsga_results must be called first"
+        
+        self.presentable_results['brute_force_solutions'] = {}
+        self.presentable_results['solution_status'] = {}
+
+        solutions = self.brute_force.final_solution
+        self.presentable_results['solution_status'] = {'is_viable': True}
+
+        if not solutions:
+            solutions = self.brute_force.first_solution
+            self.presentable_results['solution_status'] = {'is_viable': False}
+        
+        for solution in solutions:
+
+            title = (
+                str(solution['amount_orig_vm'])
+                + "x " + self.original_core
+                + " & " + str(solution['amount_sup_vm'])
+                + "x " + solution['ip_core']['id']
+            )
+            
+            self.presentable_results['brute_force_solutions'][title] = {
+                'title': title,
+                'nbr_sup_core' : solution['amount_sup_vm'],
+                'nbr_orig_core' : solution['amount_orig_vm'],
+                'ip_core' : solution['ip_core']['id'],
+                'ip' : solution['ip_core'],
+                'orig_core' : self.original_core,
+                'total_nbr_cores' : solution['amount_sup_vm'] + solution['amount_orig_vm'],
+                'total_cost' : solution['cost'],
+                'total_time' : solution['time'],
+                'cost_pred' : solution['cost_pred'],
+                'time_pred' : solution['time_pred']*1000,
+            }
+
+    def get_results(self):
+        return self.presentable_results

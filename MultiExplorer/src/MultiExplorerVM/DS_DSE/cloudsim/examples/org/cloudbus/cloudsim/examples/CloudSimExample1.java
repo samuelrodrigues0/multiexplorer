@@ -80,7 +80,7 @@ public class CloudSimExample1 {
 
 			// VM description
 			int vmid = 0;
-			int mips = 56;
+			int mips = 50;
 			long size = 10000;
 			int ram = 512;
 			long bw = 1000;
@@ -101,7 +101,7 @@ public class CloudSimExample1 {
 
 			// Cloudlet properties
 			int id = 0;
-			long length = 581;
+			long length = 1162;
 			long fileSize = 300;
 			long outputSize = 300;
 			int coresCloudlet= 1;

@@ -3,6 +3,7 @@ import sys
 from Adapters import CloudsimAdapter, NsgaIIPredDSEAdapter
 from ..Infrastructure.Events import Event
 from ..Infrastructure.ExecutionFlow import Step
+from Presenters import CloudSimPresenter, NSGAPresenter
 
 
 class CloudSimStep(Step):
@@ -34,6 +35,9 @@ class CloudSimStep(Step):
 
     def get_user_inputs(self):
         return self.adapter.get_user_inputs()
+    
+    def get_presenter(self):
+        return CloudSimPresenter()
 
     def __execute__(self):
         self.execution_exception = None

@@ -11,7 +11,7 @@ sys.path.append(os.path.dirname(os.path.realpath(__file__))+'/../cloudsim/')
 from InOutVM import InOut
 from DbSelectorVM import DbSelector
 from PerformancePredictorVM import PerformancePredictor
-from MultiExplorer.src.MultiExplorerVM.DS_DSE.cloudsim.CloudSim import CloudSim
+from ..cloudsim.CloudSim import CloudSim
  
 cwd = os.getcwd()
 
@@ -31,6 +31,8 @@ class DsDseBruteForce(object):
         self.combinations()        
         self.printCSV()
         self.printCSVfinal()
+
+
 
     def combinations(self):
         combinationList=[]

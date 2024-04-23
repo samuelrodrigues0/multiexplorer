@@ -2,6 +2,7 @@ import os
 import tkMessageBox
 from Steps import CloudSimStep, NSGAIIDSEStep
 from ..config import PATH_RUNDIR
+from Presenters import BruteForceTablePresenter, NSGATablePresenter, CloudSimPresenter, NSGAPresenter, BruteForcePresenter
 from ..Infrastructure.Events import Event
 from ..Infrastructure.ExecutionFlow import ExecutionFlow
 
@@ -68,6 +69,24 @@ class MultiExplorerVMExecutionFlow(ExecutionFlow):
         self.setup_dirs()
 
         ExecutionFlow.execute(self)
+
+    def get_results(self):
+       
+        return {
+            "cloudsim": self.steps[0].get_results(),
+            "dsdse": self.steps[1].get_results()
+        }
+    
+    def get_presenters(self):
+        
+        return [
+            NSGATablePresenter(),
+            NSGAPresenter(),
+            BruteForceTablePresenter(),
+            BruteForcePresenter(),
+            CloudSimPresenter()
+        ]
+    
 
     def handle_step_failure(self, step):
         tkMessageBox.showerror(
