@@ -80,11 +80,11 @@ public class CloudSimExample1 {
 
 			// VM description
 			int vmid = 0;
-			int mips = 50;
+			int mips = 62;
 			long size = 10000;
-			int ram = 512;
+			int ram = 8000;
 			long bw = 1000;
-			int pesNumber = 8;
+			int pesNumber = 2;
 			String vmm = "Xen"; // VMM name
 
 			// create VM
@@ -101,7 +101,7 @@ public class CloudSimExample1 {
 
 			// Cloudlet properties
 			int id = 0;
-			long length = 1162;
+			long length = 581;
 			long fileSize = 300;
 			long outputSize = 300;
 			int coresCloudlet= 1;

@@ -100,13 +100,13 @@ class CloudsimAdapter(Adapter):
         cores_cloudlet_for_design = self.input_json_data['DSE']['ExplorationSpace']['corescloudlet_for_design']
         app = self.input_json_data['Preferences']['application']
 
-        # (inputMips,  inputSize,  inputRam,     inputCpus,                       inputCoresCloudlet,                    inputLengthCloudlet): parametros
-        # (mips_orig,      10000,       512,  coresvm_orig,  int(cores_cloudlet_orig/amount_orig_vm),  int(instructions_orig/amount_orig_vm)) utilizado pelo danilo
-        print(mips, 10000, memory, cores_vm, cores_cloudlet_for_design, app)
-        self.cloudsim = CloudSim(mips, 10000, memory, cores_vm, cores_cloudlet_for_design, app)
+        self.cloudsim = CloudSim(mips, 10000, memory, cores_vm, cores_cloudlet_for_design, app/1000000)
         time = self.cloudsim.getTime()
+        #print('antes = {}'.format(time))
         time = float(time.replace(',', '.')) / 3600 # horas
-        time = time % 0.7 # RETIRAR DEPOIS, COLOQUEI APENAS PARA NAO ESTRAGAR O GRAFICO. ARRUMAR O GET_TIME DO SIMULADOR
+        time = time * 1000 # millihours
+        #print('depois = {}'.format(time))
+
         self.set_presentable_results(time, price)
 
     def set_presentable_results(self, time, price):
@@ -320,7 +320,7 @@ class NsgaIIPredDSEAdapter(Adapter):
                 'total_cost' : solution['Results']['total_cost'],
                 'total_time' : solution['Results']['total_time'],
                 'cost_pred' : solution['Results']['cost_pred'],
-                'time_pred' : solution['Results']['time_pred']*1000,
+                'time_pred' : solution['Results']['time_pred'] * 1000,
             }
 
     def register_brute_force_results(self):
@@ -360,7 +360,7 @@ class NsgaIIPredDSEAdapter(Adapter):
                 'total_cost' : solution['cost'],
                 'total_time' : solution['time'],
                 'cost_pred' : solution['cost_pred'],
-                'time_pred' : solution['time_pred']*1000,
+                'time_pred' : solution['time_pred'] * 1000,
             }
 
     def get_results(self):

@@ -26,9 +26,9 @@ class CloudSimPresenter(Presenter):
     def get_info(self, step_results, options=None):
         
         simulation_preview = (
-            "Time: {} hours\n"
+            "Time: {} millihours\n"
             "Price: {} \n"
-        ).format('%.2f' % step_results['original_time'], '%.2f' % step_results['original_price'])
+        ).format('%.6f' % step_results['original_time'], '%.6f' % step_results['original_price'])
 
         return simulation_preview
 
@@ -120,8 +120,8 @@ class BruteForceTablePresenter(Presenter):
         for s in solutions:
             solutions_data.append([
                 s,
-                '%.3f' % round(solutions[s]['cost_pred'], 3),
-                str(round(solutions[s]['time_pred'], 3)) + " ms",
+                '%.6f' % round(solutions[s]['cost_pred'], 6),
+                "%.6f" % round(float(solutions[s]['time_pred']), 6) + " millihours"
             ])
 
         table_options['data'] = solutions_data
@@ -249,8 +249,8 @@ class NSGATablePresenter(Presenter):
         for s in solutions:
             solutions_data.append([
                 s,
-                '%.3f' % round(solutions[s]['cost_pred'], 3),
-                str(round(float(solutions[s]['time_pred']), 3)) + " ms",
+                '%.6f' % round(solutions[s]['cost_pred'], 6),
+                "%.6f" % round(float(solutions[s]['time_pred']), 6) + " millihours",
             ])
 
         table_options['data'] = solutions_data
@@ -379,7 +379,7 @@ class NSGAPresenter(PlotbookPresenter):
                 color=NSGAPresenter.density_color
             )
 
-        ax2.set_xlabel("Predicted time (ms)", fontsize=NSGAPresenter.axis_font_size)
+        ax2.set_xlabel("Predicted time (millihours)", fontsize=NSGAPresenter.axis_font_size)
 
         ax.set_xlabel("Predicted cost", fontsize=NSGAPresenter.axis_font_size)
 
@@ -529,7 +529,7 @@ class BruteForcePresenter(PlotbookPresenter):
                 color=BruteForcePresenter.density_color
             )
 
-        ax2.set_xlabel("Predicted time (ms)", fontsize=BruteForcePresenter.axis_font_size)
+        ax2.set_xlabel("Predicted time (millihours)", fontsize=BruteForcePresenter.axis_font_size)
 
         ax.set_xlabel("Predicted cost", fontsize=BruteForcePresenter.axis_font_size)
 
