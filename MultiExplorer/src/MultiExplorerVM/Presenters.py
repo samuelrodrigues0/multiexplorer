@@ -1,11 +1,11 @@
 import copy
-import numpy as np
 import Tkinter
+import numpy as np
 from typing import Dict, Tuple
 from ..GUI.Widgets import CanvasTable
 from ..GUI.Presenters import Presenter, PlotbookPresenter
 from matplotlib.figure import Figure
-#from scipy.interpolate import interp1d
+
 
 class CloudSimPresenter(Presenter):
     
@@ -81,11 +81,13 @@ class BruteForceTablePresenter(Presenter):
 
         solutions = results['dsdse']['brute_force_solutions']
 
+        sorted_solution = results['dsdse']['sorted_bruteforce']
+
         #solutions_filtered = self.get_bf_filtered_results(solutions)
 
         #nbr_of_solutions = len(solutions_filtered)
 
-        nbr_of_solutions = len(solutions)
+        nbr_of_solutions = len(sorted_solution)
 
         height = table_options['cell_height'] * (6 + nbr_of_solutions + 6)
 
@@ -117,7 +119,7 @@ class BruteForceTablePresenter(Presenter):
         ]
 
         #for s in solutions_filtered:
-        for s in solutions:
+        for s in sorted_solution:
             solutions_data.append([
                 s,
                 '%.6f' % round(solutions[s]['cost_pred'], 6),
@@ -220,7 +222,9 @@ class NSGATablePresenter(Presenter):
 
         solutions = results['dsdse']['nsga_solutions']
 
-        nbr_of_solutions = len(solutions)
+        sorted_solution = results['dsdse']['sorted_nsga']
+
+        nbr_of_solutions = len(sorted_solution)
 
         height = table_options['cell_height'] * (6 + nbr_of_solutions + 6)
 
@@ -246,7 +250,7 @@ class NSGATablePresenter(Presenter):
             ['Architecture', 'Predicted cost', 'Predicted time'],
         ]
 
-        for s in solutions:
+        for s in sorted_solution:
             solutions_data.append([
                 s,
                 '%.6f' % round(solutions[s]['cost_pred'], 6),
@@ -278,13 +282,15 @@ class NSGAPresenter(PlotbookPresenter):
 
     axis_font_size = 12
 
-    perf_color = 'darkblue'
+    time_color = 'darkblue'
 
-    density_color = 'red'
+    price_color = 'red'
 
     def get_figures(self, results):
 
         population_results = results['dsdse']['nsga_solutions']
+
+        filtered_population = results['dsdse']['sorted_nsga']
 
         original_time = results['cloudsim']['original_time']
 
@@ -292,9 +298,10 @@ class NSGAPresenter(PlotbookPresenter):
 
         return {
             "NSGA-II Approximated Paretto Set": self.plot_population(
-                population_results,
+                population_results, # mostrando o total
                 original_time,
-                original_price
+                original_price,
+                filtered_population
             )
         }
 
@@ -310,29 +317,29 @@ class NSGAPresenter(PlotbookPresenter):
         raise NotImplementedError
 
     @staticmethod
-    def get_pd_performance_points(population_results):
+    def get_pd_performance_points(population_results, filtered_solutions):
         solutions = population_results.keys()
 
         points = []
 
-        for key in population_results:
+        for key in filtered_solutions:
             solution = population_results[key]
 
             points.append((
-                solution['time_pred'],
                 float(solution['cost_pred']),
+                solution['time_pred'],
                 solution['title']
             ))
 
         return points
 
     @staticmethod
-    def plot_population(population_results, original_time, original_price):
+    def plot_population(population_results, original_time, original_price, filtered_solutions):
         
         # type: (Dict, Tuple, Tuple) -> Figure
-        points = NSGAPresenter.get_pd_performance_points(population_results)
+        points = NSGAPresenter.get_pd_performance_points(population_results, filtered_solutions)
 
-        power_density_values, performance_values, titles = zip(*points)
+        price_values, time_values, titles = zip(*points)
 
         nbr_of_solutions = len(titles)
 
@@ -351,10 +358,10 @@ class NSGAPresenter(PlotbookPresenter):
 
         ax2 = ax.twiny()
 
-        performance_bars = ax2.barh(ind * 2 + .5 * height, performance_values, height, align='center',
-                                    color=NSGAPresenter.perf_color)
+        time_bars = ax2.barh(ind * 2 + .5 * height, time_values, height, align='center',
+                                    color=NSGAPresenter.time_color)
 
-        for bar in performance_bars:
+        for bar in time_bars:
             ax2.text(
                 bar.get_x() + bar.get_width(),
                 bar.get_y() + bar.get_height() * .5,
@@ -362,13 +369,13 @@ class NSGAPresenter(PlotbookPresenter):
                 ha='left',
                 va='center',
                 fontsize=NSGAPresenter.bar_text_font_size,
-                color=NSGAPresenter.perf_color
+                color=NSGAPresenter.time_color
             )
 
-        power_density_bars = ax.barh(ind * 2 - .5 * height, power_density_values,
-                                     height=height, align='center', color=NSGAPresenter.density_color)
+        price_bars = ax.barh(ind * 2 - .5 * height, price_values,
+                                     height=height, align='center', color=NSGAPresenter.price_color)
 
-        for bar in power_density_bars:
+        for bar in price_bars:
             ax.text(
                 bar.get_x() + bar.get_width(),
                 bar.get_y() + bar.get_height() * .5,
@@ -376,16 +383,16 @@ class NSGAPresenter(PlotbookPresenter):
                 ha='left',
                 va='center',
                 fontsize=NSGAPresenter.bar_text_font_size,
-                color=NSGAPresenter.density_color
+                color=NSGAPresenter.price_color
             )
 
         ax2.set_xlabel("Predicted time (millihours)", fontsize=NSGAPresenter.axis_font_size)
 
         ax.set_xlabel("Predicted cost", fontsize=NSGAPresenter.axis_font_size)
 
-        ax2.axvline(x=original_time, color=NSGAPresenter.perf_color)
+        ax2.axvline(x=original_time, color=NSGAPresenter.time_color)
 
-        ax.axvline(x=original_price, color=NSGAPresenter.density_color)
+        ax.axvline(x=original_price, color=NSGAPresenter.price_color)
 
         ylim = ax2.get_ylim()
 
@@ -396,7 +403,7 @@ class NSGAPresenter(PlotbookPresenter):
             ha='left',
             va='top',
             fontsize=NSGAPresenter.bar_text_font_size * 5 / 6,
-            color=NSGAPresenter.perf_color
+            color=NSGAPresenter.time_color
         )
 
         xlim = ax.get_xlim()
@@ -408,7 +415,7 @@ class NSGAPresenter(PlotbookPresenter):
             ha='left',
             va='bottom',
             fontsize=NSGAPresenter.bar_text_font_size * 5 / 6,
-            color=NSGAPresenter.density_color
+            color=NSGAPresenter.price_color
         )
 
         fig.subplots_adjust(
@@ -435,13 +442,15 @@ class BruteForcePresenter(PlotbookPresenter):
 
     axis_font_size = 12
 
-    perf_color = 'darkblue'
+    time_color = 'darkblue'
 
-    density_color = 'red'
+    price_color = 'red'
 
     def get_figures(self, results):
 
         population_results = results['dsdse']['brute_force_solutions']
+
+        filtered_population = results['dsdse']['sorted_bruteforce']
 
         original_time = results['cloudsim']['original_time']
 
@@ -451,7 +460,8 @@ class BruteForcePresenter(PlotbookPresenter):
             "Brute Force Approximated Paretto Set": self.plot_population(
                 population_results,
                 original_time,
-                original_price
+                original_price,
+                filtered_population
             )
         }
 
@@ -459,30 +469,30 @@ class BruteForcePresenter(PlotbookPresenter):
         raise NotImplementedError
 
     @staticmethod
-    def get_pd_performance_points(population_results):
+    def get_pd_performance_points(population_results, filtred_solutions):
         
         solutions = population_results.keys()
 
         points = []
 
-        for key in population_results:
+        for key in filtred_solutions:
             solution = population_results[key]
 
             points.append((
-                solution['time_pred'],
                 float(solution['cost_pred']),
+                solution['time_pred'],
                 solution['title']
             ))
 
         return points
 
     @staticmethod
-    def plot_population(population_results, original_time, original_price):
+    def plot_population(population_results, original_time, original_price, filtered_solutions):
         
         # type: (Dict, Tuple, Tuple) -> Figure
-        points = BruteForcePresenter.get_pd_performance_points(population_results)
+        points = BruteForcePresenter.get_pd_performance_points(population_results, filtered_solutions)
 
-        power_density_values, performance_values, titles = zip(*points)
+        price_values, time_values, titles = zip(*points)
 
         nbr_of_solutions = len(titles)
 
@@ -501,10 +511,10 @@ class BruteForcePresenter(PlotbookPresenter):
 
         ax2 = ax.twiny()
 
-        performance_bars = ax2.barh(ind * 2 + .5 * height, performance_values, height, align='center',
-                                    color=BruteForcePresenter.perf_color)
+        time_bars = ax2.barh(ind * 2 + .5 * height, time_values, height, align='center',
+                                    color=BruteForcePresenter.time_color)
 
-        for bar in performance_bars:
+        for bar in time_bars:
             ax2.text(
                 bar.get_x() + bar.get_width(),
                 bar.get_y() + bar.get_height() * .5,
@@ -512,13 +522,13 @@ class BruteForcePresenter(PlotbookPresenter):
                 ha='left',
                 va='center',
                 fontsize=BruteForcePresenter.bar_text_font_size,
-                color=BruteForcePresenter.perf_color
+                color=BruteForcePresenter.time_color
             )
 
-        power_density_bars = ax.barh(ind * 2 - .5 * height, power_density_values,
-                                     height=height, align='center', color=BruteForcePresenter.density_color)
+        price_bars = ax.barh(ind * 2 - .5 * height, price_values,
+                                     height=height, align='center', color=BruteForcePresenter.price_color)
 
-        for bar in power_density_bars:
+        for bar in price_bars:
             ax.text(
                 bar.get_x() + bar.get_width(),
                 bar.get_y() + bar.get_height() * .5,
@@ -526,16 +536,16 @@ class BruteForcePresenter(PlotbookPresenter):
                 ha='left',
                 va='center',
                 fontsize=BruteForcePresenter.bar_text_font_size,
-                color=BruteForcePresenter.density_color
+                color=BruteForcePresenter.price_color
             )
 
         ax2.set_xlabel("Predicted time (millihours)", fontsize=BruteForcePresenter.axis_font_size)
 
         ax.set_xlabel("Predicted cost", fontsize=BruteForcePresenter.axis_font_size)
 
-        ax2.axvline(x=original_time, color=BruteForcePresenter.perf_color)
+        ax2.axvline(x=original_time, color=BruteForcePresenter.time_color)
 
-        ax.axvline(x=original_price, color=BruteForcePresenter.density_color)
+        ax.axvline(x=original_price, color=BruteForcePresenter.price_color)
 
         ylim = ax2.get_ylim()
 
@@ -546,7 +556,7 @@ class BruteForcePresenter(PlotbookPresenter):
             ha='left',
             va='top',
             fontsize=BruteForcePresenter.bar_text_font_size * 5 / 6,
-            color=BruteForcePresenter.perf_color
+            color=BruteForcePresenter.time_color
         )
 
         xlim = ax.get_xlim()
@@ -558,7 +568,7 @@ class BruteForcePresenter(PlotbookPresenter):
             ha='left',
             va='bottom',
             fontsize=BruteForcePresenter.bar_text_font_size * 5 / 6,
-            color=BruteForcePresenter.density_color
+            color=BruteForcePresenter.price_color
         )
 
         fig.subplots_adjust(

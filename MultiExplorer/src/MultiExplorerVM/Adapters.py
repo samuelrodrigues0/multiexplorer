@@ -102,10 +102,8 @@ class CloudsimAdapter(Adapter):
 
         self.cloudsim = CloudSim(mips, 10000, memory, cores_vm, cores_cloudlet_for_design, app/1000000)
         time = self.cloudsim.getTime()
-        #print('antes = {}'.format(time))
         time = float(time.replace(',', '.')) / 3600 # horas
         time = time * 1000 # millihours
-        #print('depois = {}'.format(time))
 
         self.set_presentable_results(time, price)
 
@@ -235,6 +233,8 @@ class NsgaIIPredDSEAdapter(Adapter):
 
         self.register_brute_force_results()
 
+        self.ord_values()
+
     def get_json_name(self):
         dir_names = listdir(self.project_folder)
         jsons = [dir for dir in dir_names if dir.endswith(".json")]
@@ -313,7 +313,7 @@ class NsgaIIPredDSEAdapter(Adapter):
                 'title': title,
                 'nbr_sup_core' : solution['amount_sup_vm'],
                 'nbr_orig_core' : solution['amount_original_vm'],
-                'ip_core' : solution['core_ip']['id'],
+                'ip_core' : solution['core_ip']['id'],  
                 'ip' : solution['core_ip'],
                 'orig_core' : self.original_core,
                 'total_nbr_cores' : solution['amount_sup_vm'] + solution['amount_original_vm'],
@@ -365,3 +365,50 @@ class NsgaIIPredDSEAdapter(Adapter):
 
     def get_results(self):
         return self.presentable_results
+
+    def ord_values(self):
+        nsga_solutions = self.presentable_results['nsga_solutions']
+        sorted_nsga = [key for key, value in sorted(nsga_solutions.items(), key=lambda sol: float(sol[1]['time_pred']), reverse=True)]            
+
+        filtered_sorted_nsga = []
+        
+        for i in range(len(sorted_nsga)):
+            if i == (len(sorted_nsga)-1):
+                if nsga_solutions[filtered_sorted_nsga[-1]]['time_pred'] != nsga_solutions[sorted_nsga[i]]['time_pred']:
+                    filtered_sorted_nsga.append(sorted_nsga[i])
+                break
+
+            if nsga_solutions[sorted_nsga[i]]['time_pred'] != nsga_solutions[sorted_nsga[i+1]]['time_pred']:
+                filtered_sorted_nsga.append(sorted_nsga[i])
+            else:
+                if nsga_solutions[sorted_nsga[i]]['cost_pred'] > nsga_solutions[sorted_nsga[i+1]]['cost_pred']:
+                    continue
+                else:
+                    sorted_nsga[i+1] = sorted_nsga[i]
+
+        filtered_sorted_nsga = filtered_sorted_nsga[:10]
+
+        self.presentable_results['sorted_nsga'] = filtered_sorted_nsga
+
+        if 'brute_force_solutions' in self.presentable_results:
+            brute_force_solutions = self.presentable_results['brute_force_solutions']
+            sorted_bruteforce = [key for key, value in sorted(brute_force_solutions.items(), key=lambda sol: float(sol[1]['time_pred']), reverse=True)]
+            filtered_sorted_bf = []
+        
+            for i in range(len(sorted_bruteforce)):
+                if i == (len(sorted_bruteforce)-1):
+                    if brute_force_solutions[filtered_sorted_bf[-1]]['time_pred'] != brute_force_solutions[sorted_bruteforce[i]]['time_pred']:
+                        filtered_sorted_bf.append(sorted_bruteforce[i])
+                    break
+                
+                if brute_force_solutions[sorted_bruteforce[i]]['time_pred'] != brute_force_solutions[sorted_bruteforce[i+1]]['time_pred']:
+                    filtered_sorted_bf.append(sorted_bruteforce[i])
+                else:
+                    if brute_force_solutions[sorted_bruteforce[i]]['cost_pred'] > brute_force_solutions[sorted_bruteforce[i+1]]['cost_pred']:
+                        continue
+                    else:
+                        sorted_bruteforce[i+1] = sorted_bruteforce[i]
+
+            filtered_sorted_bf = filtered_sorted_bf[:10]
+            
+            self.presentable_results['sorted_bruteforce'] = filtered_sorted_bf

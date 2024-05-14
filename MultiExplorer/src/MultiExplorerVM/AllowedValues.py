@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 
-from os.path import exists
 import json
 from enum import Enum
+from os.path import exists
 from ..config import PATH_INPUTS
 
 PATH_VM = PATH_INPUTS + '/VM/'
@@ -30,10 +30,8 @@ e as aplicações de 0 a 3
 ?
 Em qual arquivo que eu posso encontrar onde muda na
 interface gráfica?
-
-
-
 """
+
 class Simulators(Enum):
     Cloudsim = 1
 
