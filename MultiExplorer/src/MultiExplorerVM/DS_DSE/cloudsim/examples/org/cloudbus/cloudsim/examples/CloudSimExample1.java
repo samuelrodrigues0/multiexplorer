@@ -82,9 +82,9 @@ public class CloudSimExample1 {
 			int vmid = 0;
 			int mips = 62;
 			long size = 10000;
-			int ram = 512;
+			int ram = 8000;
 			long bw = 1000;
-			int pesNumber = 96;
+			int pesNumber = 2;
 			String vmm = "Xen"; // VMM name
 
 			// create VM

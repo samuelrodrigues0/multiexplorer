@@ -12,13 +12,13 @@ class Nsga2Main(object):
     """
     Main Class
     """
-    def __init__(self, projectFolder, inputName):
+    def __init__(self, projectFolder, inputName, mutation_strength, mutation_rate, num_of_individuals, num_of_generations):
         print("projectFolderNSGA2MAIN:" + projectFolder)
         selector= DbSelector(inputName=inputName)
         self.bd=json.loads(open(selector.select_db()).read())
         dse_definitions = Definitions()
         problem = DS_DSE(dse_definitions, projectFolder, inputName)
-        evolution = Evolution(problem, 50, 20, projectFolder, inputName=inputName)
+        evolution = Evolution(problem, num_of_generations, num_of_individuals, mutation_strength, mutation_rate, projectFolder, inputName=inputName)
         evolution.register_on_new_generation(self.print_generation)
         pareto_front = evolution.evolve()
         output = InOut(projectFolder, inputName)

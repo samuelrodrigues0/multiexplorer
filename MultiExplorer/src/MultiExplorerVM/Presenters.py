@@ -46,7 +46,6 @@ class BruteForceTablePresenter(Presenter):
                 + " solutions."
         )
 
-
     def __init__(self):
         
         super(BruteForceTablePresenter, self).__init__()
@@ -55,10 +54,8 @@ class BruteForceTablePresenter(Presenter):
 
         self.sol_table = None
 
-
     def present_partials(self, frame, step_results, options=None):
         raise NotImplementedError
-
 
     def present_results(self, frame, results, options=None):
         
@@ -132,7 +129,6 @@ class BruteForceTablePresenter(Presenter):
 
         return height
 
-
     def get_bf_filtered_results(self, solutions):
 
         removed = self.remove_duplicate_solutions(solutions)
@@ -149,13 +145,6 @@ class BruteForceTablePresenter(Presenter):
     def filter_brute_force_results(self, solutions, top10):
 
         global brute_force_values
-
-        #counter = 0
-        #for key, value in solutions.items():
-        #    brute_force_values[key] = copy.deepcopy(value)
-        #    counter += 1
-        #    if counter == 5:
-        #        break
 
         counter = 0
         for solution in top10:
@@ -196,10 +185,8 @@ class NSGATablePresenter(Presenter):
 
         self.sol_table = None
 
-
     def present_partials(self, frame, step_results, options=None):
         raise NotImplementedError
-
 
     def present_results(self, frame, results, options=None):
         
@@ -262,7 +249,6 @@ class NSGATablePresenter(Presenter):
         self.sol_table = CanvasTable(self.canvas, table_options)
 
         return height
-
 
     def get_info(self, step_results, options=None):
         raise NotImplemented

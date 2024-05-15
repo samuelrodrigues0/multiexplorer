@@ -205,6 +205,46 @@ class NsgaIIPredDSEAdapter(Adapter):
                     })
                 ],
             }),
+            InputGroup({
+                'label': "NSGA-II Parameters",
+                'key': 'nsga_parameters',
+                'inputs': [
+                    Input({
+                        'label': 'Crossing Rate',
+                        'unit': '%',
+                        'key': 'mutation_strength',
+                        'type': InputType.Float,
+                        "is_user_input": True,
+                        "required": True,
+                        "default_value": 1.0,
+                    }),
+                    Input({
+                        'label': 'Mutation Rate',
+                        'unit': '%',
+                        'key': 'mutation_rate',
+                        'type': InputType.Float,
+                        "is_user_input": True,
+                        "required": True,
+                        "default_value": 90.0,
+                    }),
+                    Input({
+                        'label': 'Population Size',
+                        'key': 'num_of_individuals',
+                        'type': InputType.Integer,
+                        "is_user_input": True,
+                        "required": True,
+                        "default_value": 20
+                    }),
+                    Input({
+                        'label': 'Number of Generations',
+                        'key': 'num_of_generations',
+                        'type': InputType.Integer,
+                        "is_user_input": True,
+                        "required": True,
+                        "default_value": 50
+                    }),
+                ],
+            })
         ])
 
         self.nsga = None
@@ -272,7 +312,14 @@ class NsgaIIPredDSEAdapter(Adapter):
         self.get_json_data()
 
     def dse(self):
-        self.nsga = Nsga2Main(self.project_folder, self.input_json)
+        self.nsga = Nsga2Main ( 
+                        self.project_folder,
+                        self.input_json,
+                        float(self.inputs['nsga_parameters']['mutation_strength'])/100,
+                        float(self.inputs['nsga_parameters']['mutation_rate'])/100,
+                        int(self.inputs['nsga_parameters']['num_of_individuals']),
+                        int(self.inputs['nsga_parameters']['num_of_generations']),
+                    )
         print("DSE NSGA2: OK")
 
     def dse_brute_force(self):
@@ -368,47 +415,31 @@ class NsgaIIPredDSEAdapter(Adapter):
 
     def ord_values(self):
         nsga_solutions = self.presentable_results['nsga_solutions']
-        sorted_nsga = [key for key, value in sorted(nsga_solutions.items(), key=lambda sol: float(sol[1]['time_pred']), reverse=True)]            
-
-        filtered_sorted_nsga = []
-        
-        for i in range(len(sorted_nsga)):
-            if i == (len(sorted_nsga)-1):
-                if nsga_solutions[filtered_sorted_nsga[-1]]['time_pred'] != nsga_solutions[sorted_nsga[i]]['time_pred']:
-                    filtered_sorted_nsga.append(sorted_nsga[i])
-                break
-
-            if nsga_solutions[sorted_nsga[i]]['time_pred'] != nsga_solutions[sorted_nsga[i+1]]['time_pred']:
-                filtered_sorted_nsga.append(sorted_nsga[i])
-            else:
-                if nsga_solutions[sorted_nsga[i]]['cost_pred'] > nsga_solutions[sorted_nsga[i+1]]['cost_pred']:
-                    continue
-                else:
-                    sorted_nsga[i+1] = sorted_nsga[i]
-
-        filtered_sorted_nsga = filtered_sorted_nsga[:10]
-
-        self.presentable_results['sorted_nsga'] = filtered_sorted_nsga
+        self.presentable_results['sorted_nsga'] = self.get_filtered_results(nsga_solutions)
 
         if 'brute_force_solutions' in self.presentable_results:
             brute_force_solutions = self.presentable_results['brute_force_solutions']
-            sorted_bruteforce = [key for key, value in sorted(brute_force_solutions.items(), key=lambda sol: float(sol[1]['time_pred']), reverse=True)]
-            filtered_sorted_bf = []
-        
-            for i in range(len(sorted_bruteforce)):
-                if i == (len(sorted_bruteforce)-1):
-                    if brute_force_solutions[filtered_sorted_bf[-1]]['time_pred'] != brute_force_solutions[sorted_bruteforce[i]]['time_pred']:
-                        filtered_sorted_bf.append(sorted_bruteforce[i])
-                    break
-                
-                if brute_force_solutions[sorted_bruteforce[i]]['time_pred'] != brute_force_solutions[sorted_bruteforce[i+1]]['time_pred']:
-                    filtered_sorted_bf.append(sorted_bruteforce[i])
-                else:
-                    if brute_force_solutions[sorted_bruteforce[i]]['cost_pred'] > brute_force_solutions[sorted_bruteforce[i+1]]['cost_pred']:
-                        continue
-                    else:
-                        sorted_bruteforce[i+1] = sorted_bruteforce[i]
+            self.presentable_results['sorted_bruteforce'] = self.get_filtered_results(brute_force_solutions)
 
-            filtered_sorted_bf = filtered_sorted_bf[:10]
-            
-            self.presentable_results['sorted_bruteforce'] = filtered_sorted_bf
+    def get_filtered_results(self, solutions):
+        sorted_solutions = [key for key, value in sorted(solutions.items(), key=lambda sol: float(sol[1]['time_pred']), reverse=True)]            
+        filtered_sorted_solutions = []
+        solutions_length = len(sorted_solutions)
+        
+        for i in range(solutions_length):
+            if i == (solutions_length-1):
+                if solutions[filtered_sorted_solutions[-1]]['time_pred'] != solutions[sorted_solutions[i]]['time_pred']:
+                    filtered_sorted_solutions.append(sorted_solutions[i])
+                break
+
+            if solutions[sorted_solutions[i]]['time_pred'] != solutions[sorted_solutions[i+1]]['time_pred']:
+                filtered_sorted_solutions.append(sorted_solutions[i])
+            else:
+                if solutions[sorted_solutions[i]]['cost_pred'] > solutions[sorted_solutions[i+1]]['cost_pred']:
+                    continue
+                else:
+                    sorted_solutions[i+1] = sorted_solutions[i]
+
+        filtered_sorted_solutions = filtered_sorted_solutions[:10]
+
+        return filtered_sorted_solutions
