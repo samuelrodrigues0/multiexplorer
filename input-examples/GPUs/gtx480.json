@@ -1,0 +1,43 @@
+{
+	"Preferences":
+	{
+		"sim_tool":"gpgpusim",
+		"project_name":"GTX480_clock_mlp",
+		"application":"clock",
+		"DSE":true
+	},
+	"General_Modeling":
+	{
+		"model_name":"GTX480",
+		"clock_rate": 700,
+		"n_SM": 15,
+		"shmem_size":49152,
+		"registers":32768,
+		"blocks/SM":8,
+		"threads/SM":1536,
+		"gpuwattch": 0, 		
+		
+		"power":
+		{
+			"vdd":"1.2",
+			"technology_node":"45",
+			"temperature": "330"
+		}
+	},
+
+	"DSE":
+	{
+		"ExplorationSpace":{
+		"ip_cores_for_design":[1, 25],
+	        "original_cores_for_design":[1, 15]
+		},
+		"Constraints":
+		{
+			"maximum_powerDensity":0.31,
+			"maximum_area":545.85,
+			"technology":"all",
+			"benchmark":"Experimentos",
+			"application":"clock"
+		}
+	}
+}

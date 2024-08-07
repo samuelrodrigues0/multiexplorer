@@ -1,0 +1,3 @@
+Os dados em backprop, bfs, dwt2d, hotspot, needle, nn e vectorAdd são apenas
+uma cópia dos dados que estão em asyncAPI, o intuito é só fazer o fluxo do
+Multiexplorer funcionar

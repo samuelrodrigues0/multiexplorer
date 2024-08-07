@@ -1,5 +1,7 @@
 /Multi2SimToMcPAT/Multi2Sim_Input_mips
 
+MultiExplorer/support/java/*
+
 /rundir/*
 
 *.log
