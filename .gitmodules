@@ -1,0 +1,3 @@
+[submodule "gpgpu-sim_distribution"]
+	path = gpgpu-sim_distribution
+	url = https://github.com/gpgpu-sim/gpgpu-sim_distribution.git
