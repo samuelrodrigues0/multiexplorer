@@ -37,12 +37,16 @@ MultiExplorer has a user manual available:
 
 [Versão em Português](https://drive.google.com/file/d/1k-dRORaTcIzu-WT24yhHfvvvH-zKF_62/view?usp=drive_link)
 
-[Extending MultiExplorer](https://drive.google.com/file/d/1GXZVjFcHwobzM22NEUrlKVQkOzzAAfVQ/view?usp=drive_link)
+[Extending MultiExplorer](https://drive.google.com/file/d/1xHp9yB6vfc2T2_3pC-Ury0blBEzYLBZf/view?usp=drive_link)
 
 How to Install ?
 ================
 The first step is to acquire a stable version of MultiExplorer from a release in the
 [repository](https://github.com/lscad-facom-ufms/MultiExplorer.git)
+
+To clone the repository along with its submodules, run:
+
+`$ git clone --recurse-submodules https://github.com/lscad-facom-ufms/multiexplorer.git`
 
 Important setting files are:
 - *.env*: you must set the DISPLAY variable if you want to use the GUI (only required for **Docker** environments)
