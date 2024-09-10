@@ -76,7 +76,7 @@ or run:
 
 After the ".env" file is ready, you can start the container and ssh into it using the following commands:
 
-`$ docker-compose up -d`
+`$ docker compose up -d`
 
 `$ docker exec -it <<container_name>> bash`
 
