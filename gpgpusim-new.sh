@@ -17,7 +17,7 @@ then
     BFSOUTUPUT=BFSOutput.txt
     BFSERROR=BFSstderr.txt
 else
-    RUNDIR="rundir/Multiexplorer_GPGPU/$1-$CURRENTDATE-$((RANDOM % 100000))"
+    RUNDIR="rundir/Multiexplorer_GPUs/$1-$CURRENTDATE-$((RANDOM % 100000))"
     CONFIGS_FOLDER=$2
     BFSOUTUPUT=$3
     BFSERROR=$4
@@ -63,10 +63,10 @@ echo "App: \"$APPLICATION\""
 echo ""
 ##{ { nohup $APPLICATION; } | (tee BFSOutput.txt ); } 2>&1 &
 
-export CUDA_INSTALL_PATH=/usr/local/cuda
-source ../../../gpgpu-sim_distribution/setup_environment
+#export CUDA_INSTALL_PATH=/usr/local/cuda
+#source ../../../gpgpu-sim_distribution/setup_environment
 
-{ { $APPLICATION; } > >(tee BFSOutput.txt ); } 2> >( tee BFSstderr.txt >&2 )
+#{ { $APPLICATION; } > >(tee BFSOutput.txt ); } 2> >( tee BFSstderr.txt >&2 )
 
 #echo ""
 #echo "****************************************************************************************************************"
@@ -79,10 +79,10 @@ source ../../../gpgpu-sim_distribution/setup_environment
 #echo ""
 
 #pwd
-mv $BFSOUTUPUT output/
-mv $BFSERROR output/
+#mv $BFSOUTUPUT output/
+#mv $BFSERROR output/
 #cp $MULTIEXPLORER_INPUT output/
-cp *.log output/
+#cp *.log output/
 rm -rf /multiexplorer/$CONFIGS_FOLDER
 # Atribui o diretorio de ambiente (RUNDIR=$HOME/...)
 # Copia todas as configurações para o RUNDIR

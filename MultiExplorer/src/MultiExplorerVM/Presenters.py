@@ -2,9 +2,9 @@ import copy
 import Tkinter
 import numpy as np
 from typing import Dict, Tuple
+from matplotlib.figure import Figure
 from ..GUI.Widgets import CanvasTable
 from ..GUI.Presenters import Presenter, PlotbookPresenter
-from matplotlib.figure import Figure
 
 
 class CloudSimPresenter(Presenter):
@@ -99,7 +99,7 @@ class BruteForceTablePresenter(Presenter):
         if results['dsdse']['solution_status']['is_viable']:
             text = "Viable Solutions Found through Brute Force (respected restrictions)"
         else:
-            text = "No viable solutions found; brute force solutions did not respect all restrictions."
+            text = "No viable solutions found; brute force and nsga solutions did not respect all restrictions."
 
 
         self.canvas.create_text(2, 2*(cell_height+2), text=text,

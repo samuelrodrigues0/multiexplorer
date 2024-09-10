@@ -3,13 +3,19 @@
 """Module with main parts of NSGA-II algorithm.
 Contains main loop"""
 
-from nsga2.NSGA2Utils import NSGA2Utils
-from nsga2.Population import Population
+from .NSGA2Utils import NSGA2Utils
+from .Population import Population
 
 class Evolution(object):
     
     def __init__(self, problem, num_of_generations, num_of_individuals, projectFolder, inputName, mutation_rate, mutation_strength):
-        self.utils = NSGA2Utils(problem, num_of_individuals, projectFolder, inputName, mutation_rate, mutation_strength)
+        self.utils = NSGA2Utils(
+            problem, 
+            num_of_individuals, 
+            projectFolder, 
+            inputName, 
+            mutation_rate, 
+            mutation_strength)
 
         self.population = None
         self.num_of_generations = num_of_generations

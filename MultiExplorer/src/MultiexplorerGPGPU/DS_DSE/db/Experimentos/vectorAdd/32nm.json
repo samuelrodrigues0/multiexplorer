@@ -1,6 +1,7 @@
 {
 "ipcores":[
-	{"id":"TITANX_32nm", "pow": 18.360, "area":23.883, "perf":1838.766},
-	{"id":"KEPLER_32nm", "pow": 15.164, "area":36.509, "perf":1559.127}
+	{"id":"TITANX_32nm", "pow": 5.662, "area": 30.449, "perf": 34556.552}
+	{"id":"KEPLER_32nm", "pow": 5.705, "area": 31.067, "perf": 27323.013},
+	{"id":"GTX480_32nm", "pow": 4.783, "area": 28.893, "perf": 24633.031}
 ] 
 }

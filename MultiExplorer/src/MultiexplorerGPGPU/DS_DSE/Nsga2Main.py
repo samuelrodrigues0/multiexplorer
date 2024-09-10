@@ -28,7 +28,7 @@ class Nsga2Main(object):
         problem = DS_DSE(dse_definitions, projectFolder, inputName)
 #       evolution = Evolution(problem, 5000, 10, projectFolder)
         #evolution = Evolution(problem, 100, 10, projectFolder, inputName)
-        evolution = Evolution(problem, self.inputs_from_user["num_of_generations"], self.inputs_from_user["num_of_individuals"], projectFolder, inputName, self.inputs_from_user["mutation_rate"], self.inputs_from_user["mutation_strength"] )
+        evolution = Evolution(problem, int(self.inputs_from_user["num_of_generations"]), int(self.inputs_from_user["num_of_individuals"]), projectFolder, inputName, float(self.inputs_from_user["mutation_rate"])/100.0, float(self.inputs_from_user["mutation_strength"]/100.0) )
         #evolution.register_on_new_generation(plotter.plot_population_best_front)
         evolution.register_on_new_generation(self.print_generation)
         #evolution.register_on_new_generation(print_metrics)

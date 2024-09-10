@@ -128,7 +128,7 @@ class InOut(object):
             num = num+1
         self.writeResults()
         JsonToCSV(self.projectFolder).convertJSONToCSV()
-        var2 = PATH_RUNDIR + "/MultiExplorer_VM/Resultados_menorTempo_menorCusto.csv"
+        var2 = PATH_RUNDIR + "/MultiExplorer_Virtual_Machines/Resultados_menorTempo_menorCusto.csv"
         csv_data = open(var2, 'a')
         csvWriter = csv.writer(csv_data)
         result = str(self.menorTempo)

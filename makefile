@@ -17,7 +17,6 @@ endif
 	python get-pip.py
 	pip2 install -r requirements.txt
 	apt install -y python-tk
-	dpkg -i MultiExplorer/support/java/jdk.deb
 	make -f MakeSniper
 
 config:

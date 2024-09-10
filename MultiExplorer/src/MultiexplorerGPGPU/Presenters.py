@@ -1,12 +1,11 @@
+import copy
 import Tkinter
-
 import numpy as np
 from typing import Dict, Tuple
 from matplotlib.figure import Figure
 from scipy.interpolate import interp1d
-from MultiExplorer.src.GUI.Presenters import Presenter, PlotbookPresenter
 from MultiExplorer.src.GUI.Widgets import CanvasTable
-import copy
+from MultiExplorer.src.GUI.Presenters import Presenter, PlotbookPresenter
 
 brute_force_values = {}
 
@@ -19,23 +18,23 @@ class GPGPUSimPresenter(Presenter):
 
         self.canvas_frame = None
 
-
     def present_results(self, frame, results, options=None):
         # todo
         return 0
 
-
     def present_partials(self, frame, step_results, options=None):
         raise NotImplementedError
-
 
     def get_info(self, step_results, options=None):
         
         simulation_preview = (
-            "Simulation time: {} sec\n"
-            "Instruction rate: {} (inst/sec)\n"
-            "Cycles rate: {} (cycle/sec)"
-        ).format(str(step_results['simulation_time']), str(step_results['simulation_instructions_rate']), str(step_results['simulation_cycles_rate']))
+            #"Simulation time: {} sec\n"
+            #"Instruction rate: {} (inst/sec)\n"
+            #"Cycles rate: {} (cycle/sec)"
+            "Performance: {:.2f}\n"
+            "power_density: {:.2f}"
+        ).format(step_results['simulation_performance'], step_results['power_density'])
+        #.format(str(step_results['simulation_time']), str(step_results['simulation_instructions_rate']), str(step_results['simulation_cycles_rate']))
 
         return simulation_preview
 
@@ -43,7 +42,6 @@ class GPGPUSimPresenter(Presenter):
 class BruteForceTablePresenter(Presenter):
 
     def get_info(self, step_results, options=None):
-        
         if 'brute_force_solutions' not in step_results:
             return ""
 
@@ -53,22 +51,17 @@ class BruteForceTablePresenter(Presenter):
                 + " solutions."
         )
 
-
     def __init__(self):
-        
         super(BruteForceTablePresenter, self).__init__()
 
         self.canvas = None
 
         self.sol_table = None
 
-
     def present_partials(self, frame, step_results, options=None):
         raise NotImplementedError
 
-
     def present_results(self, frame, results, options=None):
-        
         if 'brute_force_solutions' not in results['dsdse']:
             return 0
 
@@ -135,9 +128,7 @@ class BruteForceTablePresenter(Presenter):
 
         return height
 
-
     def get_bf_filtered_results(self, solutions):
-
         removed = self.remove_duplicate_solutions(solutions)
 
         for i in removed:
@@ -149,17 +140,8 @@ class BruteForceTablePresenter(Presenter):
 
         return solutions_filtered
 
-
     def filter_brute_force_results(self, solutions, top10):
-
         global brute_force_values
-
-        #counter = 0
-        #for key, value in solutions.items():
-        #    brute_force_values[key] = copy.deepcopy(value)
-        #    counter += 1
-        #    if counter == 5:
-        #        break
 
         counter = 0
         for solution in top10:
@@ -168,9 +150,7 @@ class BruteForceTablePresenter(Presenter):
             if counter == 5:
                 break
 
-
     def remove_duplicate_solutions(self, solutions):
-        
         final_solutions = []
         removed_solutions = []
 
@@ -223,15 +203,12 @@ class NSGAPresenter(PlotbookPresenter):
             )
         }
 
-
     def get_info(self, step_results, options=None):
-        
         return (
                 "NSGA-II generated a paretto frontier aproximation containing "
                 + str(len(step_results['solutions']))
                 + " distinct points."
         )
-
 
     def present_partials(self, frame, step_results, options=None):
         raise NotImplementedError
@@ -255,7 +232,6 @@ class NSGAPresenter(PlotbookPresenter):
 
     @staticmethod
     def plot_population(population_results, original_performance, original_power_density):
-        
         # type: (Dict, Tuple, Tuple) -> Figure
         points = NSGAPresenter.get_pd_performance_points(population_results)
 
@@ -349,9 +325,8 @@ class NSGAPresenter(PlotbookPresenter):
 
 
 class NSGATablePresenter(Presenter):
-    
+
     def __init__(self):
-        
         super(NSGATablePresenter, self).__init__()
 
         self.canvas = None
@@ -360,13 +335,10 @@ class NSGATablePresenter(Presenter):
 
         self.sol_table = None
 
-
     def present_partials(self, frame, step_results, options=None):
         raise NotImplementedError
 
-
     def present_results(self, frame, results, options=None):
-        
         if 'solutions' not in results['dsdse']:
             return 0
 
@@ -426,7 +398,6 @@ class NSGATablePresenter(Presenter):
 
         return height
 
-
     def get_info(self, step_results, options=None):
         raise NotImplemented
     
@@ -469,7 +440,6 @@ class BruteForcePresenter(PlotbookPresenter):
                 original_power_density
             )
         }
-
 
     def present_partials(self, frame, step_results, options=None):
         raise NotImplementedError
@@ -606,7 +576,6 @@ class BruteForcePresenter(PlotbookPresenter):
                 self.add_plot(title, figures[title])
 
             return PlotbookPresenter.PLOTBOOK_HEIGHT + 20
-
 
     def get_info(self, step_results, options=None):
         raise NotImplemented

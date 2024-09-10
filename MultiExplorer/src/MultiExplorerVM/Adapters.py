@@ -5,12 +5,12 @@ from os import listdir
 from os.path import exists
 from shutil import copyfile, move
 from AllowedValues import PATH_VM
-from AllowedValues import PredictedModels, PredictedApplications
-from .DS_DSE.cloudsim.CloudSim import CloudSim
 from .DS_DSE.Nsga2MainVM import Nsga2Main
-from ..Infrastructure.Inputs import Input, InputGroup, InputType
+from .DS_DSE.cloudsim.CloudSim import CloudSim
 from ..Infrastructure.ExecutionFlow import Adapter
 from .DS_DSE.brute_force.DsDseBruteForce import DsDseBruteForce
+from AllowedValues import PredictedModels, PredictedApplications
+from ..Infrastructure.Inputs import Input, InputGroup, InputType
 
 
 class CloudsimAdapter(Adapter):
@@ -225,7 +225,7 @@ class NsgaIIPredDSEAdapter(Adapter):
                         'type': InputType.Float,
                         "is_user_input": True,
                         "required": True,
-                        "default_value": 1.0,
+                        "default_value": 50.0,
                     }),
                     Input({
                         'label': 'Mutation Rate',
@@ -234,7 +234,7 @@ class NsgaIIPredDSEAdapter(Adapter):
                         'type': InputType.Float,
                         "is_user_input": True,
                         "required": True,
-                        "default_value": 90.0,
+                        "default_value": 10.0,
                     }),
                     Input({
                         'label': 'Population Size',
@@ -242,7 +242,7 @@ class NsgaIIPredDSEAdapter(Adapter):
                         'type': InputType.Integer,
                         "is_user_input": True,
                         "required": True,
-                        "default_value": 20
+                        "default_value": 10
                     }),
                     Input({
                         'label': 'Number of Generations',
@@ -250,7 +250,7 @@ class NsgaIIPredDSEAdapter(Adapter):
                         'type': InputType.Integer,
                         "is_user_input": True,
                         "required": True,
-                        "default_value": 50
+                        "default_value": 150
                     }),
                 ],
             })
@@ -277,11 +277,8 @@ class NsgaIIPredDSEAdapter(Adapter):
             self.dse_brute_force()
         
         self.dse()
-
         self.register_nsga_results()
-
         self.register_brute_force_results()
-
         self.ord_values()
 
     def get_json_name(self):
@@ -396,7 +393,7 @@ class NsgaIIPredDSEAdapter(Adapter):
         if not solutions:
             solutions = self.brute_force.first_solution
             self.presentable_results['solution_status'] = {'is_viable': False}
-        
+
         for solution in solutions:
 
             title = (
@@ -425,11 +422,15 @@ class NsgaIIPredDSEAdapter(Adapter):
 
     def ord_values(self):
         nsga_solutions = self.presentable_results['nsga_solutions']
-        self.presentable_results['sorted_nsga'] = self.get_filtered_results(nsga_solutions)
+        if len(nsga_solutions) != 1:
+            self.presentable_results['sorted_nsga'] = self.get_filtered_results(nsga_solutions)
+        else:
+            self.presentable_results['sorted_nsga'] = self.presentable_results['nsga_solutions']
 
         if 'brute_force_solutions' in self.presentable_results:
             brute_force_solutions = self.presentable_results['brute_force_solutions']
-            self.presentable_results['sorted_bruteforce'] = self.get_filtered_results(brute_force_solutions)
+            if len(brute_force_solutions) != 1:
+                self.presentable_results['sorted_bruteforce'] = self.get_filtered_results(brute_force_solutions)
 
     def get_filtered_results(self, solutions):
         sorted_solutions = [key for key, value in sorted(solutions.items(), key=lambda sol: float(sol[1]['time_pred']), reverse=True)]            
@@ -449,6 +450,7 @@ class NsgaIIPredDSEAdapter(Adapter):
                     continue
                 else:
                     sorted_solutions[i+1] = sorted_solutions[i]
+
 
         filtered_sorted_solutions = filtered_sorted_solutions[:10]
 

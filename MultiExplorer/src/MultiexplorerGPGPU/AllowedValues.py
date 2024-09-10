@@ -1,8 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from enum import Enum
-
-from MultiExplorer.src.config import PATH_INPUTS
+from ..config import PATH_INPUTS
 
 
 class Simulators(Enum):

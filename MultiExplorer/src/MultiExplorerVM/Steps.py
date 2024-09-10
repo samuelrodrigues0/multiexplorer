@@ -1,9 +1,9 @@
 import os
 import sys
-from Adapters import CloudsimAdapter, NsgaIIPredDSEAdapter
 from ..Infrastructure.Events import Event
 from ..Infrastructure.ExecutionFlow import Step
 from Presenters import CloudSimPresenter, NSGAPresenter
+from Adapters import CloudsimAdapter, NsgaIIPredDSEAdapter
 
 
 class CloudSimStep(Step):
@@ -53,7 +53,9 @@ class CloudSimStep(Step):
         else:
             self.fire(Event.STEP_EXECUTION_FAILED, self)
 
+
 class NSGAIIDSEStep(Step):
+    
     def get_results(self):
         return self.adapter.get_results()
 
@@ -75,12 +77,15 @@ class NSGAIIDSEStep(Step):
         self.adapter = NsgaIIPredDSEAdapter()
 
     @staticmethod
-    def get_label(): return 'DSE'
+    def get_label(): 
+        return 'DSE'
 
     @staticmethod
-    def has_user_input(): return True
+    def has_user_input(): 
+        return True
 
-    def get_user_inputs(self): return self.adapter.get_user_inputs()
+    def get_user_inputs(self): 
+        return self.adapter.get_user_inputs()
 
     def __execute__(self):
         self.execution_exception = None
@@ -95,3 +100,4 @@ class NSGAIIDSEStep(Step):
             self.fire(Event.STEP_EXECUTION_ENDED)
         else:
             self.fire(Event.STEP_EXECUTION_FAILED, self)
+           

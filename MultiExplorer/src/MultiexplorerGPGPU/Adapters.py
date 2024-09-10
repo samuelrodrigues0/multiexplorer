@@ -1,30 +1,25 @@
 # -*- coding: utf-8 -*-
-import json, time
 import os
-import sys
 import re
-from typing import Dict, Union, Any, Optional
+import sys
+import json, time
 from xml.dom import minidom
+from sklearn import metrics
+from .DS_DSE.metric import *
 from xml.etree import ElementTree
-from MultiExplorer.src.MultiexplorerGPGPU.AllowedValues import PredictedModels, Applications
+from typing import Dict, Union, Any, Optional
+from MultiExplorer.src.config import PATH_REPO, PATH_RUNDIR, GPU_DB
 from MultiExplorer.src.Infrastructure.ExecutionFlow import Adapter
 from MultiExplorer.src.Infrastructure.Inputs import Input, InputGroup, InputType
-from MultiExplorer.src.config import PATH_REPO, PATH_RUNDIR
-from .DS_DSE.metric import *
-from sklearn import metrics
+from MultiExplorer.src.MultiexplorerGPGPU.AllowedValues import PredictedModels, Applications
 
-
-importPath = os.path.dirname(os.path.realpath(
-    __file__)) + '/DS_DSE/nsga2/'
+importPath = os.path.dirname(os.path.realpath(__file__)) + '/DS_DSE/nsga2/'
 sys.path.insert(0, importPath)
-importPath = os.path.dirname(os.path.realpath(
-    __file__)) + '/DS_DSE/'
+importPath = os.path.dirname(os.path.realpath(__file__)) + '/DS_DSE/'
 sys.path.insert(0, importPath)
-importPath = os.path.dirname(os.path.realpath(
-    __file__)) + '/DS_DSE/brute_force/'
+importPath = os.path.dirname(os.path.realpath(__file__)) + '/DS_DSE/brute_force/'
 sys.path.insert(0, importPath)
-importPath = os.path.dirname(os.path.realpath(
-    __file__)) + '/PerformanceExploration/GPGPU'
+importPath = os.path.dirname(os.path.realpath(__file__)) + '/PerformanceExploration/GPGPU'
 sys.path.insert(0, importPath)
 
 from GPGPU import GPGPU
@@ -33,7 +28,6 @@ from DsDseBruteForce import DsDseBruteForce
 
 
 projectFolder = None
-
 
 class GPGPUSimulatorAdapter(Adapter):
     
@@ -71,6 +65,12 @@ class GPGPUSimulatorAdapter(Adapter):
 
         self.inFile = None
 
+        self.app = None
+
+        self.lithography = None
+
+        self.model = None
+
         self.inJson = None
         
         self.simTool = None
@@ -80,15 +80,12 @@ class GPGPUSimulatorAdapter(Adapter):
         self.presentable_results = None    
 
     def execute(self):
-        
-        print('\n'*3 + '-'*20 + 'Simulation' + '-'*20)
         self.prepare()
         self.sim_execute()
         self.project_folder()
         self.change_json_in_project_folder()
-        self.check_results()
+        #self.check_results()
         self.register_simulation_results()
-        print('\n'*3)
 
     def prepare(self):
         global jsonLocation
@@ -108,8 +105,8 @@ class GPGPUSimulatorAdapter(Adapter):
     def project_folder(self):
         global projectFolder
 
-        path = PATH_RUNDIR + '/Multiexplorer_GPGPU/'
-        dirs = [f for f in os.listdir(PATH_RUNDIR + '/Multiexplorer_GPGPU/') if os.path.isdir(os.path.join(path, f))]
+        path = PATH_RUNDIR + '/Multiexplorer_GPUs/'
+        dirs = [f for f in os.listdir(PATH_RUNDIR + '/Multiexplorer_GPUs/') if os.path.isdir(os.path.join(path, f))]
         sorted_dirs = sorted(dirs, key=lambda d: os.path.getctime(os.path.join(path, d)), reverse=True)
         projectFolder = path + sorted_dirs[0]
 
@@ -127,12 +124,15 @@ class GPGPUSimulatorAdapter(Adapter):
         with open(json_path) as data_file:
             json_data = json.load(data_file)
             
-        json_data['Preferences']['application'] = Applications.get_model(gui_data['app'])
-        json_data['Preferences']['project_name'] = PredictedModels.get_model(gui_data['model_name']) + '_' + Applications.get_model(gui_data['app'])
+        self.app = Applications.get_model(gui_data['app'])
+        self.model = PredictedModels.get_model(gui_data['model_name'])
+        self.lithography = json_data["General_Modeling"]["power"]["technology_node"]
+
+        json_data['Preferences']['application'] = self.app
+        json_data['Preferences']['project_name'] = self.model + '_' + self.app
 
         with open(json_path, 'w') as data_file:
             json.dump(json_data, data_file, sort_keys=True, indent=4)
-
 
     def check_results(self):
         global projectFolder
@@ -158,41 +158,52 @@ class GPGPUSimulatorAdapter(Adapter):
         except IOError:
             raise Exception("No GPGPU-Sim output found")
 
-
     def register_simulation_results(self):
-        global projectFolder
+        #global projectFolder
 
-        path = projectFolder + '/output/BFSOutput.txt'
+        #path = projectFolder + '/output/BFSOutput.txt'
+
+        #try:
+        #    with open(path) as simulation_file:
+                
+        #        simulation_output = simulation_file.readlines()
+
+        #        output_length = len(simulation_output)
+
+        #        gpgpusim__text = "----------------------------END-of-Interconnect-DETAILS-------------------------\n"
+
+        #        i = 1
+        #        while(simulation_output[-i] != gpgpusim__text):
+        #            i += 1
+
+        #        simulation_output = "".join(simulation_output[output_length - i:])
+
+        #        sim_time = int(re.search(r"gpgpu_simulation_time = .* \((\d+) sec\)", simulation_output).group(1))
+        #        sim_instructions_rate = int(re.search(r"gpgpu_simulation_rate = (\d+) \(inst/sec\)", simulation_output).group(1))
+        #        sim_cycles_rate = int(re.search(r"gpgpu_simulation_rate = (\d+) \(cycle/sec\)", simulation_output).group(1))
+
+        path = GPU_DB + '/' + self.app + '/all.json'
+
+        name = self.model + "_" + self.lithography + "nm"
 
         try:
-            with open(path) as simulation_file:
-                
-                simulation_output = simulation_file.readlines()
+            with open(path, 'r') as sim_data:
+                sim_db_data = json.load(sim_data) 
 
-                output_length = len(simulation_output)
-
-                gpgpusim__text = "----------------------------END-of-Interconnect-DETAILS-------------------------\n"
-
-                i = 1
-                while(simulation_output[-i] != gpgpusim__text):
-                    i += 1
-
-                simulation_output = "".join(simulation_output[output_length - i:])
-
-                sim_time = int(re.search(r"gpgpu_simulation_time = .* \((\d+) sec\)", simulation_output).group(1))
-                sim_instructions_rate = int(re.search(r"gpgpu_simulation_rate = (\d+) \(inst/sec\)", simulation_output).group(1))
-                sim_cycles_rate = int(re.search(r"gpgpu_simulation_rate = (\d+) \(cycle/sec\)", simulation_output).group(1))
-
+                for i in sim_db_data["ipcores"]:
+                    if i["id"] == name:
+                        sim_time = float(i["perf"])
+                        pd = float(i["pow"]) / float(i["area"])
 
             self.presentable_results = {
-                'simulation_time': sim_time,
-                'simulation_instructions_rate' : sim_instructions_rate,
-                'simulation_cycles_rate': sim_cycles_rate
+                'simulation_performance': sim_time,
+                'power_density': pd
+                #'simulation_instructions_rate' : sim_instructions_rate,
+                #'simulation_cycles_rate': sim_cycles_rate
             }
 
         except IOError:
-            raise "No GPGPU-Sim output found"
-
+            raise "No app output found"
 
     def get_results(self):
         return self.presentable_results
@@ -258,7 +269,6 @@ class DSEAdapter(Adapter):
                                 'type': InputType.Float,
                                 "is_user_input": True,
                                 "required": True,
-                                "default_value":0.3
                             }),
                             Input({
                                 'label': 'Maximum Area',
@@ -266,8 +276,7 @@ class DSEAdapter(Adapter):
                                 'key': 'maximum_area',
                                 'type': InputType.Float,
                                 "is_user_input": True,
-                                "required": True,
-                                "default_value":200
+                                "required": True
                             }),
                         ],
                     }),
@@ -291,7 +300,7 @@ class DSEAdapter(Adapter):
                                 'type': InputType.Float,
                                 "is_user_input": True,
                                 "required": True,
-                                "default_value": 99.0,
+                                "default_value": 10.0,
                             }),
                             Input({
                                 'label': 'Population Size',
@@ -299,7 +308,7 @@ class DSEAdapter(Adapter):
                                 'type': InputType.Integer,
                                 "is_user_input": True,
                                 "required": True,
-                                "default_value": 10
+                                "default_value": 150
                             }),
                             Input({
                                 'label': 'Number of Generations',
@@ -307,7 +316,7 @@ class DSEAdapter(Adapter):
                                 'type': InputType.Integer,
                                 "is_user_input": True,
                                 "required": True,
-                                "default_value": 2
+                                "default_value": 10
                             }),
                         ],
                     })
@@ -329,7 +338,6 @@ class DSEAdapter(Adapter):
 
 
     def execute(self):
-        
         print('-'*20 + 'DSE' + '-'*20)
 
         self.prepare()
@@ -429,10 +437,12 @@ class DSEAdapter(Adapter):
 
         if self.brute_force:
             simulation_inputs = self.brute_force.inputDict['parameters']
-            orig_core_performance = self.brute_force.preditor.performance_core_original
+            print(simulation_inputs)
+            orig_core_performance = simulation_inputs["performance_orig"][0]
         else:
             simulation_inputs = self.nsga.inputDict['parameters']
-            orig_core_performance = self.nsga.preditor.performance_core_original
+            print(simulation_inputs)
+            orig_core_performance = simulation_inputs["performance_orig"][0]
         
         pow_density = float(simulation_inputs["power_orig"][0])/float(simulation_inputs["area_orig"][0])
 

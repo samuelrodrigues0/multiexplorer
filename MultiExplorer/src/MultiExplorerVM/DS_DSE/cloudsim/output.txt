@@ -8,9 +8,9 @@ Entities started.
 0.0: Broker: Trying to Create VM #0 in Datacenter_0
 0.1: Broker: VM #0 has been created in Datacenter #2, Host #0
 0.1: Broker: Sending cloudlet 0 to VM #0
-4.77741935483871: Broker: Cloudlet 0 received
-4.77741935483871: Broker: All Cloudlets executed. Finishing...
-4.77741935483871: Broker: Destroying VM #0
+6.229032258064516: Broker: Cloudlet 0 received
+6.229032258064516: Broker: All Cloudlets executed. Finishing...
+6.229032258064516: Broker: Destroying VM #0
 Broker is shutting down...
 Simulation: No more future events
 CloudInformationService: Notify all CloudSim entities for shutting down.
@@ -21,5 +21,5 @@ Simulation completed.
 
 ========== OUTPUT ==========
 Cloudlet ID    STATUS    Data center ID    VM ID    Time    Start Time    Finish Time
-    0        SUCCESS        2            0        4.68        0.1        4.78
+    0        SUCCESS        2            0        6.13        0.1        6.23
 CloudSimExample1 finished!

@@ -101,10 +101,10 @@ public class CloudSimExample1 {
 
 			// Cloudlet properties
 			int id = 0;
-			long length = 290;
+			long length = 380;
 			long fileSize = 300;
 			long outputSize = 300;
-			int coresCloudlet= 16;
+			int coresCloudlet= 15;
 			UtilizationModel utilizationModel = new UtilizationModelFull();
 
 			Cloudlet cloudlet = new Cloudlet(id, length, coresCloudlet, fileSize, outputSize, utilizationModel, utilizationModel, utilizationModel);

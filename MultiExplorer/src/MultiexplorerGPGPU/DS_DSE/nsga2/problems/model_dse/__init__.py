@@ -1,7 +1,7 @@
 # -*- coding: UTF-8 -*-
 """Module with definition of DS_DSE problem interface"""
 import sys, os, json, math
-sys.path.append(os.path.dirname(os.path.realpath(__file__))+'/../../../../')
+sys.path.append(os.path.dirname(os.path.realpath(__file__))+'/../../../')
 from nsga2.Individual import Individual
 from nsga2.problems import Problem
 from InOut import InOut

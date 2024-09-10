@@ -1,26 +1,43 @@
 MultiExplorer Tool
 ===================
-Muliexplorer is a framework that provides a processor chip design by putting together performance simulation, 
-physical estimation, and design space exploration steps.
 
-MultiExplorer uses Sniper as a performance simulator and McPAT as physical estimator. 
+The MultiExplorer is a framework developed with the aim of automating design space exploration for computer architectures. Currently, MultiExplorer has an infrastructure that enables design space exploration for heterogeneous multicore processors, GPUs, and virtual machines.
 
-The design space exploration (DSE) is performed by a NSGA2-based algorithm.
+The multicore processors flow designs chips by integrating performance simulation, physical estimation, and design space exploration steps, using Sniper as the performance simulator and McPAT as the physical estimator. The design space exploration (DSE) is carried out by an NSGA2-based algorithm.
 
-MultiExplorer assumes that all processor designs are dark silicon aware so that it uses the power density as a
-constraint in the DSE step.To know more about MultiExplorer and its Dark-Silicon aware - DSE approach please refer
-to our paper:
+It assumes that all processor designs are dark-silicon aware, using power density as a constraint in the DSE step. For more information about the MultiExplorer CPU flow and its dark-silicon-aware DSE approach, please refer to our paper:
 
 SANTOS, R.;DUENHA, L.; SILVA, A. C. S.; BIGNARDI, T.; SOUSA, M.; TEDESCO, L.; MELGAREJO JUNIOR, J.; AZEVEDO, R.; ORDONEZ, E. D. M.. 
 Dark-Silicon Aware Design Space Exploration. JOURNAL OF PARALLEL AND DISTRIBUTED COMPUTING, v. 120, 2018, pp 295-306, ISSN 0743-7315.
+
+For the virtual machine system design space exploration flow, the performance of the virtual machines was measured using the CloudSim}simulator, and the exploration was conducted using the NSGA-II genetic algorithm. The goal of this exploration flow is to maximize application performance and minimize the cost of using virtual machines in a cloud computing environment.
+
+For more information about this execution flow, refer to the paper:
+
+Arigoni, D. and Santos, R. (2022). Exploração do espaço de projetos de sistemas heterogêneos aplicada ao problema de alocação de recursos em nuvem. 
+Master’s thesis, Universidade Federal de Mato Grosso do Sul.
+
+[paper](https://repositorio.ufms.br/handle/123456789/5005)
+
+For the heterogeneous GPU-based system design space exploration flow, simulation and physical estimation tools such as GPGPU-Sim and GPUWattch were used. 
+The exploration algorithm employed was NSGA-II. The flow aims to maximize performance while minimizing the power density of GPU-based computational systems.
+
+For more information:
+
+Sonohata, R. and Duenha, L. (2022). Exploração do espaço de projetos de sistemas gpgpu ciente de dark silicon. 
+Master’s thesis, Universidade Federal de Mato Grosso do Sul.
+
+[paper](https://repositorio.ufms.br/handle/123456789/5070)
 
 User Manual
 ===========
 MultiExplorer has a user manual available:
 
-[English Version](https://drive.google.com/file/d/1XCgdApa8Pm0iUacygrTmWGyWXquhjOuU/view?usp=drive_link)
+[English Version](https://drive.google.com/file/d/1hCKnrWTLyh5HLZS_5E9AP_qamxDm3R26/view?usp=drive_link)
 
-[Versão em Português](https://drive.google.com/file/d/1JYvdxGZpFAuLS1jU-EBfLuURGj3zWxiP/view?usp=drive_link)
+[Versão em Português](https://drive.google.com/file/d/1k-dRORaTcIzu-WT24yhHfvvvH-zKF_62/view?usp=drive_link)
+
+[Extending MultiExplorer](https://drive.google.com/file/d/1GXZVjFcHwobzM22NEUrlKVQkOzzAAfVQ/view?usp=drive_link)
 
 How to Install ?
 ================
@@ -87,6 +104,7 @@ Other software requirements are:
 - [Sniper 8.0](http://snipersim.org)
   - [Sniper's Benchmarks](https://snipersim.org/w/Download_Benchmarks)  
 - [Python 2.7](https://www.python.org/download/releases/2.7/)
+- [Java-JDK](https://download.oracle.com/java/22/latest/jdk-22_linux-x64_bin.deb)
 
 In case you want to take a shortcut from compiling Sniper and it's benchmarks, you can get a pre-compiled version . We have a pre-compiled version of Sniper with benchmarks, if you use the Docker environment.
 - [Pre-Compiled Sniper with Benchmarks for the Docker Environment](https://drive.google.com/file/d/1aXNxy6OZ7NjP1XUgnhOGuTFAUePtwZkW/view)
@@ -105,46 +123,6 @@ and disable authentication.
 
 If you are using **Docker** in a Linux environment, running `$ xhost +` will likewise disable authentication, allowing
 the use of the display by software in the container.
-
-Using the command line
-=========================
-There are many input examples available in the "input-examples" folder.
-You should run one of the .json files in that folder.
-For example:
-
-`$ python MultiExplorer/src/MultiExplorer.py input-examples/quark.json`
-
-Just wait the simulation steps finish. All the output files will be in the rundir folder. Note that MultiExplorer will create a folder 
-for your design and simulation,5n the *rundir* folder, following the order: PerformanceSimulatorJSONInputApplicationDate_Time. 
-Example: SniperSimQuarkCholesky20210205_104802
-
-Command Line Output Files
-=========================
-These files will be in the *rundir* folder after running MultiExplorer from the command line:
-
-ArchComparison.csv:  a csv file with physical and performance results from the original and the proposed design.          
-
-MCPATPhysicalResults.txt: McPAT physical estimates (area, power, etc.) of the original design.
-               
-outputBruteForce.csv: a csv file with all the configurations obtained from our BF DS-DSE algorithm.
-      
-performanceReport.txt: outputs of the performance simulator.     
-
-populationResults.csv: a csv file with all the configurations from our NSGA2-based DS-DSE algorithm.
-    
-sim.info: log file of the benchmark compilation.
-
-sim.out: output of the performance simulator.
-
-SniperPerformanceResults.txt: log file of the performance simulator
-
-SniperSimQuarkCholesky_mcpatInput.xml: input file for the Physical estimator (McPAT).
-
-**There may be additional files, reserved for future use in MultiExplorer.
-
-If you are using the GUI, results are presented directly through it, but input and output files can still be found
-in the *rundir* folder for each run, in the folder corresponding to the selected execution flow
-(e.g.: */rundir/Multicore_CPU_Heterogeneous_DSDSE*).
 
 Issues
 =========================

@@ -1,24 +1,22 @@
 import os
 import tkMessageBox
-from Steps import CloudSimStep, NSGAIIDSEStep
 from ..config import PATH_RUNDIR
-from Presenters import BruteForceTablePresenter, NSGATablePresenter, CloudSimPresenter, NSGAPresenter, BruteForcePresenter
 from ..Infrastructure.Events import Event
+from Steps import CloudSimStep, NSGAIIDSEStep
 from ..Infrastructure.ExecutionFlow import ExecutionFlow
+from Presenters import BruteForceTablePresenter, NSGATablePresenter, CloudSimPresenter, NSGAPresenter, BruteForcePresenter
 
 class MultiExplorerVMExecutionFlow(ExecutionFlow):
+    
     @staticmethod
     def get_info():
         return (
-            "This flow allows for a workflow to provide virtual machine configurations according to the"
-            + " users requirements and applications constraints. \n"
-            + "MultiExplorer-VM uses CloudSim as the cloud simulator."
-            + " The design space exploration (DSE) is performed by a NSGA2-based algorithm. \n"
-            + "In this current version, Muliexplorer-VM also adopts a brute-force (bf) algorithm to explore"
-            + "all viable alternatives to the design. \n"
-            + "The bf has been used as a validation step to our DSE approach."
+            "This workflow enables the configuration of virtual machines based on user requirements and application constraints. \n"
+            + "MultiExplorer-VM utilizes CloudSim as the cloud simulation platform. \n"
+            + "The design space exploration (DSE) is conducted using an NSGA2-based algorithm. \n"
+            + "In the current version, MultiExplorer-VM also incorporates a brute-force algorithm to explore all viable design alternatives. \n"
+            + "The brute-force approach serves as a validation step for our DSE methodology."
         )
-
 
     def __new__(cls):
         if not hasattr(cls, 'instance'):
@@ -39,7 +37,7 @@ class MultiExplorerVMExecutionFlow(ExecutionFlow):
 
     @staticmethod
     def get_label():
-        return 'MultiExplorer VM'
+        return 'MultiExplorer Virtual Machines'
 
     def get_output_path(self):
         return (
@@ -71,14 +69,12 @@ class MultiExplorerVMExecutionFlow(ExecutionFlow):
         ExecutionFlow.execute(self)
 
     def get_results(self):
-       
         return {
             "cloudsim": self.steps[0].get_results(),
             "dsdse": self.steps[1].get_results()
         }
     
     def get_presenters(self):
-        
         return [
             NSGATablePresenter(),
             NSGAPresenter(),
@@ -87,7 +83,6 @@ class MultiExplorerVMExecutionFlow(ExecutionFlow):
             CloudSimPresenter()
         ]
     
-
     def handle_step_failure(self, step):
         tkMessageBox.showerror(
             "Execution Failure",
