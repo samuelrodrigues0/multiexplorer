@@ -162,10 +162,6 @@ class BruteForceTablePresenter(Presenter):
             else:
                 removed_solutions.append(solution)
 
-        # excluir depois
-        for solution in removed_solutions:
-            print(solution)
-
         return removed_solutions
     
 
