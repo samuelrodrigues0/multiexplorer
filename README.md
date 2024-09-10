@@ -44,6 +44,10 @@ How to Install ?
 The first step is to acquire a stable version of MultiExplorer from a release in the
 [repository](https://github.com/lscad-facom-ufms/MultiExplorer.git)
 
+To clone the repository along with its submodules, run:
+
+`$ git clone --recurse-submodules https://github.com/lscad-facom-ufms/multiexplorer.git`
+
 Important setting files are:
 - *.env*: you must set the DISPLAY variable if you want to use the GUI (only required for **Docker** environments)
 - *MultiExplorer/src/config.py*: you will need proper path settings
