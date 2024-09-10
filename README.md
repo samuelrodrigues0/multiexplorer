@@ -37,7 +37,7 @@ MultiExplorer has a user manual available:
 
 [Versão em Português](https://drive.google.com/file/d/1k-dRORaTcIzu-WT24yhHfvvvH-zKF_62/view?usp=drive_link)
 
-[Extending MultiExplorer](https://drive.google.com/file/d/1GXZVjFcHwobzM22NEUrlKVQkOzzAAfVQ/view?usp=drive_link)
+[Extending MultiExplorer](https://drive.google.com/file/d/1xHp9yB6vfc2T2_3pC-Ury0blBEzYLBZf/view?usp=drive_link)
 
 How to Install ?
 ================
