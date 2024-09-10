@@ -437,11 +437,11 @@ class DSEAdapter(Adapter):
 
         if self.brute_force:
             simulation_inputs = self.brute_force.inputDict['parameters']
-            print(simulation_inputs)
+            #print(simulation_inputs)
             orig_core_performance = simulation_inputs["performance_orig"][0]
         else:
             simulation_inputs = self.nsga.inputDict['parameters']
-            print(simulation_inputs)
+            #print(simulation_inputs)
             orig_core_performance = simulation_inputs["performance_orig"][0]
         
         pow_density = float(simulation_inputs["power_orig"][0])/float(simulation_inputs["area_orig"][0])
