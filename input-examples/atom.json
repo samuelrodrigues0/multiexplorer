@@ -92,7 +92,7 @@
 			{
 				"perfect":false,
 				"passthrough":false,
-				"cache_block_size": 32,
+				"cache_block_size": 64,
 				"cache_size":24,
 				"associativity":6,
 				"ports":2,

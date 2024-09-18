@@ -1,6 +1,7 @@
 /Multi2SimToMcPAT/Multi2Sim_Input_mips
 
 
+jdk*
 /rundir/*
 
 *.log
@@ -28,10 +29,11 @@ out.json
 /MultiExplorer/src/PerformanceExploration/Multi2Sim/.vscode/.ropeproject/objectdb
 /MultiExplorer/src/PerformanceExploration/Multi2Sim/.vscode/launch.json
 MultiExplorer/support/sniper/benchmarks/parsec/parsec-2.1/log/
-
+Benchmarks/
 /sniper-7.4-pin2/
 /sniper-7.4/
 /snipersim-8.0/
+/pre-compiled-sniper-8.0/
 sniper-benchmarks.tbz
 pre_compiled_sniper.tar
 sniper-latest.tgz
